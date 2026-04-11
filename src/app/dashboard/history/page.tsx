@@ -1,8 +1,9 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { db } from "@/db";
-import { companies, stockMovements, products } from "@/db/schema";
+import { companies, stockMovements, products, companyUsers } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { redirect } from "next/navigation";
+import ExportExcelButton from "@/components/ExportExcelButton";
 
 export const dynamic = "force-dynamic";
 
@@ -12,9 +13,13 @@ export default async function HistoryPage() {
   if (!email) redirect("/");
 
   const firma = await db
-    .select()
-    .from(companies)
-    .where(eq(companies.adminEmail, email))
+    .select({
+      id: companies.id,
+      name: companies.name,
+    })
+    .from(companyUsers)
+    .innerJoin(companies, eq(companyUsers.companyId, companies.id))
+    .where(eq(companyUsers.email, email))
     .limit(1)
     .then((r) => r[0] ?? null);
 
@@ -57,35 +62,47 @@ export default async function HistoryPage() {
         </div>
 
         {/* Özet */}
-        <div className="hidden sm:flex items-center gap-3">
-          <div className="bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-center min-w-[90px]">
-            <p className="text-2xl font-bold text-emerald-400 tabular-nums">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+          <div className="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-center min-w-[100px]">
+            <p className="text-xl sm:text-2xl font-bold text-emerald-400 tabular-nums">
               +{toplamGiris}
             </p>
-            <p className="text-slate-500 text-xs mt-0.5">Toplam Giriş</p>
+            <p className="text-slate-500 text-[10px] sm:text-xs mt-0.5">Toplam Giriş</p>
           </div>
-          <div className="bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-center min-w-[90px]">
-            <p className="text-2xl font-bold text-red-400 tabular-nums">
+          <div className="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-center min-w-[100px]">
+            <p className="text-xl sm:text-2xl font-bold text-red-400 tabular-nums">
               -{toplamCikis}
             </p>
-            <p className="text-slate-500 text-xs mt-0.5">Toplam Çıkış</p>
+            <p className="text-slate-500 text-[10px] sm:text-xs mt-0.5">Toplam Çıkış</p>
           </div>
-          <div className="bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-center min-w-[90px]">
-            <p className="text-2xl font-bold text-white tabular-nums">
+          <div className="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-center min-w-[100px]">
+            <p className="text-xl sm:text-2xl font-bold text-white tabular-nums">
               {hareketler.length}
             </p>
-            <p className="text-slate-500 text-xs mt-0.5">İşlem</p>
+            <p className="text-slate-500 text-[10px] sm:text-xs mt-0.5">İşlem</p>
           </div>
         </div>
       </div>
 
       {/* Tablo */}
       <div className="bg-slate-900 border border-slate-800 rounded-2xl shadow-xl shadow-black/30 overflow-hidden">
-        <div className="px-6 py-4 border-b border-slate-800 flex items-center justify-between">
-          <h2 className="text-white font-semibold text-sm">Tüm Hareketler</h2>
-          <span className="text-xs text-slate-500">
-            {hareketler.length} hareket
-          </span>
+        <div className="px-6 py-4 border-b border-slate-800 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <h2 className="text-white font-semibold text-sm">Tüm Hareketler</h2>
+            <span className="text-xs text-slate-500">
+              {hareketler.length} hareket
+            </span>
+          </div>
+          <ExportExcelButton
+            data={hareketler.map((h) => ({
+              Tarih: new Date(h.createdAt).toLocaleString("tr-TR"),
+              Ürün: h.productName,
+              SKU: h.productSku || "—",
+              Tip: h.type === "in" ? "Giriş" : "Çıkış",
+              Miktar: h.quantity,
+            }))}
+            fileName={`${firma.name}_Hareket_Gecmisi_${new Date().toLocaleDateString("tr-TR")}`}
+          />
         </div>
 
         {hareketler.length === 0 ? (
@@ -113,7 +130,8 @@ export default async function HistoryPage() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <div className="min-w-[700px] lg:min-w-0">
+              <table className="w-full">
               <thead>
                 <tr className="border-b border-slate-800">
                   <th className="text-left text-xs font-semibold text-slate-500 uppercase tracking-wider px-6 py-3">
@@ -201,6 +219,7 @@ export default async function HistoryPage() {
               </tbody>
             </table>
           </div>
+        </div>
         )}
       </div>
     </div>

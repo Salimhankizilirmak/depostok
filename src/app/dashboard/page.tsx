@@ -1,9 +1,10 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { db } from "@/db";
-import { companies, products } from "@/db/schema";
+import { companies, products, companyUsers } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { addProduct } from "./actions";
 import StockButtons from "@/components/StockButtons";
+import ExportExcelButton from "@/components/ExportExcelButton";
 import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
@@ -15,9 +16,13 @@ export default async function DashboardPage() {
   if (!email) redirect("/");
 
   const firma = await db
-    .select()
-    .from(companies)
-    .where(eq(companies.adminEmail, email))
+    .select({
+      id: companies.id,
+      name: companies.name,
+    })
+    .from(companyUsers)
+    .innerJoin(companies, eq(companyUsers.companyId, companies.id))
+    .where(eq(companyUsers.email, email))
     .limit(1)
     .then((r) => r[0] ?? null);
 
@@ -141,7 +146,7 @@ export default async function DashboardPage() {
           <div className="mt-4 flex justify-end">
             <button
               type="submit"
-              className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold text-sm rounded-xl px-6 py-2.5 transition-all duration-200 shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 active:scale-[0.98]"
+              className="w-full sm:w-auto bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold text-sm rounded-xl px-6 py-2.5 transition-all duration-200 shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 active:scale-[0.98]"
             >
               Ürünü Kaydet
             </button>
@@ -151,9 +156,19 @@ export default async function DashboardPage() {
 
       {/* ─── Ürün Tablosu ─── */}
       <div className="bg-slate-900 border border-slate-800 rounded-2xl shadow-xl shadow-black/30 overflow-hidden">
-        <div className="px-6 py-4 border-b border-slate-800 flex items-center justify-between">
-          <h2 className="text-white font-semibold text-sm">Ürün Listesi</h2>
-          <span className="text-xs text-slate-500">{urunler.length} ürün</span>
+        <div className="px-6 py-4 border-b border-slate-800 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <h2 className="text-white font-semibold text-sm">Ürün Listesi</h2>
+            <span className="text-xs text-slate-500">{urunler.length} ürün</span>
+          </div>
+          <ExportExcelButton
+            data={urunler.map((u) => ({
+              "Ürün Adı": u.name,
+              "Stok Kodu (SKU)": u.sku || "—",
+              "Mevcut Stok": u.currentStock,
+            }))}
+            fileName={`${firma.name}_Stok_Raporu_${new Date().toLocaleDateString("tr-TR")}`}
+          />
         </div>
 
         {urunler.length === 0 ? (

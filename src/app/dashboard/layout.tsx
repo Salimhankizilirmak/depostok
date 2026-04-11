@@ -1,7 +1,7 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { UserButton } from "@clerk/nextjs";
 import { db } from "@/db";
-import { companies } from "@/db/schema";
+import { companies, companyUsers } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import type { ReactNode } from "react";
 import DashboardNav from "@/components/DashboardNav";
@@ -16,9 +16,13 @@ export default async function DashboardLayout({
 
   const firma = email
     ? await db
-        .select()
-        .from(companies)
-        .where(eq(companies.adminEmail, email))
+        .select({
+          id: companies.id,
+          name: companies.name,
+        })
+        .from(companyUsers)
+        .innerJoin(companies, eq(companyUsers.companyId, companies.id))
+        .where(eq(companyUsers.email, email))
         .limit(1)
         .then((r) => r[0] ?? null)
     : null;
@@ -67,19 +71,19 @@ export default async function DashboardLayout({
     <div className="min-h-screen bg-slate-950">
       {/* Navbar */}
       <header className="border-b border-slate-800 bg-slate-900/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
           {/* Firma Adı + Logo */}
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/30">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/30 flex-shrink-0">
               <span className="text-white font-bold text-sm">
                 {firma.name.charAt(0).toUpperCase()}
               </span>
             </div>
-            <div>
-              <span className="text-white font-semibold text-sm tracking-tight">
+            <div className="min-w-0">
+              <span className="text-white font-semibold text-sm tracking-tight truncate block">
                 {firma.name}
               </span>
-              <span className="block text-slate-500 text-xs">
+              <span className="block text-slate-500 text-[10px] sm:text-xs">
                 Firma Paneli
               </span>
             </div>
@@ -96,7 +100,7 @@ export default async function DashboardLayout({
       </header>
 
       {/* İçerik */}
-      <main className="max-w-7xl mx-auto px-6 py-8">{children}</main>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 md:py-8">{children}</main>
     </div>
   );
 }

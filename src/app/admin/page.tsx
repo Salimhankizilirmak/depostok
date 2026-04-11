@@ -141,12 +141,13 @@ export default async function AdminPage() {
                 </p>
               </div>
             ) : (
-              <div className="divide-y divide-slate-800">
-                {firmalar.map((firma, index) => (
-                  <div
-                    key={firma.id}
-                    className="px-6 py-4 flex items-center gap-4 hover:bg-slate-800/50 transition-colors"
-                  >
+              <div className="overflow-x-auto">
+                <div className="divide-y divide-slate-800 min-w-[500px] md:min-w-0">
+                  {firmalar.map((firma, index) => (
+                    <div
+                      key={firma.id}
+                      className="px-6 py-4 flex items-center gap-4 hover:bg-slate-800/50 transition-colors"
+                    >
                     {/* Avatar */}
                     <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500/20 to-indigo-500/20 border border-violet-500/20 flex items-center justify-center flex-shrink-0">
                       <span className="text-violet-400 font-bold text-sm">
@@ -181,9 +182,10 @@ export default async function AdminPage() {
                   </div>
                 ))}
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
+      </div>
       </div>
     </div>
   );

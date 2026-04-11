@@ -35,6 +35,17 @@ export const stockMovements = sqliteTable("stock_movements", {
     .default(sql`(datetime('now'))`),
 });
 
+export const companyUsers = sqliteTable("company_users", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  companyId: text("company_id").notNull(),
+  email: text("email").notNull(),
+  createdAt: text("created_at")
+    .notNull()
+    .default(sql`(datetime('now'))`),
+});
+
 // Type helpers
 export type Company = typeof companies.$inferSelect;
 export type NewCompany = typeof companies.$inferInsert;
@@ -44,3 +55,6 @@ export type NewProduct = typeof products.$inferInsert;
 
 export type StockMovement = typeof stockMovements.$inferSelect;
 export type NewStockMovement = typeof stockMovements.$inferInsert;
+
+export type CompanyUser = typeof companyUsers.$inferSelect;
+export type NewCompanyUser = typeof companyUsers.$inferInsert;
