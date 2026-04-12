@@ -7,21 +7,14 @@ import ExportExcelButton from "@/components/ExportExcelButton";
 
 export const dynamic = "force-dynamic";
 
+import { getCompanyAndRole } from "@/lib/auth-repair";
+
 export default async function HistoryPage() {
   const user = await currentUser();
   const email = user?.emailAddresses?.[0]?.emailAddress ?? null;
   if (!email) redirect("/");
 
-  const firma = await db
-    .select({
-      id: companies.id,
-      name: companies.name,
-    })
-    .from(companyUsers)
-    .innerJoin(companies, eq(companyUsers.companyId, companies.id))
-    .where(eq(companyUsers.email, email))
-    .limit(1)
-    .then((r) => r[0] ?? null);
+  const firma = await getCompanyAndRole(email);
 
   if (!firma) redirect("/");
 

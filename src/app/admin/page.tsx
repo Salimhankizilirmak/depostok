@@ -2,6 +2,7 @@ import { db } from "@/db";
 import { companies } from "@/db/schema";
 import { addCompany } from "./actions";
 import { desc } from "drizzle-orm";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
@@ -165,19 +166,28 @@ export default async function AdminPage() {
                       </p>
                     </div>
 
-                    {/* Tarih */}
-                    <div className="text-right flex-shrink-0">
-                      <p className="text-slate-600 text-xs">
-                        {new Date(firma.createdAt).toLocaleDateString("tr-TR", {
-                          day: "2-digit",
-                          month: "short",
-                          year: "numeric",
-                        })}
-                      </p>
-                      <span className="inline-flex items-center gap-1 text-xs text-emerald-400 font-medium">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                        Aktif
-                      </span>
+                    {/* Tarih & İşlem */}
+                    <div className="flex items-center gap-6 flex-shrink-0">
+                      <div className="text-right hidden sm:block">
+                        <p className="text-slate-600 text-[10px] uppercase tracking-wider mb-0.5">Kayıt</p>
+                        <p className="text-slate-400 text-xs font-medium">
+                          {new Date(firma.createdAt).toLocaleDateString("tr-TR", {
+                            day: "2-digit",
+                            month: "short",
+                            year: "numeric",
+                          })}
+                        </p>
+                      </div>
+                      <div className="h-8 w-px bg-slate-800" />
+                      <Link
+                        href={`/admin/companies/${firma.id}`}
+                        className="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white text-[10px] sm:text-xs font-bold px-4 py-2 rounded-lg transition-all active:scale-95 flex items-center gap-2"
+                      >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+                        </svg>
+                        Yönet
+                      </Link>
                     </div>
                   </div>
                 ))}

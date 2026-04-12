@@ -7,6 +7,8 @@ import StockButtons from "@/components/StockButtons";
 import ExportExcelButton from "@/components/ExportExcelButton";
 import { redirect } from "next/navigation";
 
+import { getCompanyAndRole } from "@/lib/auth-repair";
+
 export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
@@ -15,18 +17,7 @@ export default async function DashboardPage() {
 
   if (!email) redirect("/");
 
-  const firma = await db
-    .select({
-      id: companies.id,
-      name: companies.name,
-      adminEmail: companies.adminEmail,
-      userRole: companyUsers.role,
-    })
-    .from(companyUsers)
-    .innerJoin(companies, eq(companyUsers.companyId, companies.id))
-    .where(eq(companyUsers.email, email))
-    .limit(1)
-    .then((r) => r[0] ?? null);
+  const firma = await getCompanyAndRole(email);
 
   if (!firma) redirect("/");
 

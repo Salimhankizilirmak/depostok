@@ -5,6 +5,7 @@ import { companies, companyUsers } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import type { ReactNode } from "react";
 import DashboardNav from "@/components/DashboardNav";
+import { getCompanyAndRole } from "@/lib/auth-repair";
 
 export default async function DashboardLayout({
   children,
@@ -14,19 +15,7 @@ export default async function DashboardLayout({
   const user = await currentUser();
   const email = user?.emailAddresses?.[0]?.emailAddress ?? null;
 
-  const firma = email
-    ? await db
-        .select({
-          id: companies.id,
-          name: companies.name,
-          userRole: companyUsers.role,
-        })
-        .from(companyUsers)
-        .innerJoin(companies, eq(companyUsers.companyId, companies.id))
-        .where(eq(companyUsers.email, email))
-        .limit(1)
-        .then((r) => r[0] ?? null)
-    : null;
+  const firma = email ? await getCompanyAndRole(email) : null;
 
   // ── Yetkisiz erişim ──────────────────────────────────────────────────────────
   if (!firma) {
