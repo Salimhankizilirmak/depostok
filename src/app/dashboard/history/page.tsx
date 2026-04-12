@@ -34,6 +34,8 @@ export default async function HistoryPage() {
       createdAt: stockMovements.createdAt,
       productName: products.name,
       productSku: products.sku,
+      userEmail: stockMovements.userEmail,
+      description: stockMovements.description,
     })
     .from(stockMovements)
     .innerJoin(products, eq(stockMovements.productId, products.id))
@@ -100,6 +102,8 @@ export default async function HistoryPage() {
               SKU: h.productSku || "—",
               Tip: h.type === "in" ? "Giriş" : "Çıkış",
               Miktar: h.quantity,
+              Açıklama: h.description,
+              "İşlemi Yapan": h.userEmail || "—",
             }))}
             fileName={`${firma.name}_Hareket_Gecmisi_${new Date().toLocaleDateString("tr-TR")}`}
           />
@@ -142,6 +146,12 @@ export default async function HistoryPage() {
                   </th>
                   <th className="text-center text-xs font-semibold text-slate-500 uppercase tracking-wider px-6 py-3">
                     İşlem Tipi
+                  </th>
+                  <th className="text-left text-xs font-semibold text-slate-500 uppercase tracking-wider px-6 py-3">
+                    Açıklama
+                  </th>
+                  <th className="text-left text-xs font-semibold text-slate-500 uppercase tracking-wider px-6 py-3">
+                    İşlemi Yapan
                   </th>
                   <th className="text-right text-xs font-semibold text-slate-500 uppercase tracking-wider px-6 py-3">
                     Miktar
@@ -186,21 +196,36 @@ export default async function HistoryPage() {
                     {/* Tip Badge */}
                     <td className="px-6 py-4 text-center">
                       {h.type === "in" ? (
-                        <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-3 py-1">
-                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                            <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-                          </svg>
-                          Giriş
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-red-400 bg-red-500/10 border border-red-500/20 rounded-full px-3 py-1">
-                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                            <line x1="5" y1="12" x2="19" y2="12" />
-                          </svg>
-                          Çıkış
-                        </span>
-                      )}
-                    </td>
+                        Giriş
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-red-400 bg-red-500/10 border border-red-500/20 rounded-full px-3 py-1">
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                          <line x1="5" y1="12" x2="19" y2="12" />
+                        </svg>
+                        Çıkış
+                      </span>
+                    )}
+                  </td>
+
+                  {/* Açıklama */}
+                  <td className="px-6 py-4">
+                    <p className="text-slate-300 text-sm italic">
+                      {h.description}
+                    </p>
+                  </td>
+
+                  {/* İşlemi Yapan */}
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-full bg-slate-800 flex items-center justify-center text-[10px] text-slate-400 font-bold border border-slate-700">
+                        {h.userEmail ? h.userEmail.substring(0, 1).toUpperCase() : "?"}
+                      </div>
+                      <p className="text-slate-400 text-xs">
+                        {h.userEmail ? h.userEmail.split("@")[0] : "—"}
+                      </p>
+                    </div>
+                  </td>
 
                     {/* Miktar */}
                     <td className="px-6 py-4 text-right">

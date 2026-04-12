@@ -1,7 +1,7 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { db } from "@/db";
-import { companies, products, companyUsers } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { companies, products, companyUsers, stockMovements } from "@/db/schema";
+import { eq, and, gt, desc, sql, notInArray, lte } from "drizzle-orm";
 import { addProduct } from "./actions";
 import StockButtons from "@/components/StockButtons";
 import ExportExcelButton from "@/components/ExportExcelButton";
@@ -15,10 +15,10 @@ export default async function DashboardPage() {
 
   if (!email) redirect("/");
 
-  const firma = await db
     .select({
       id: companies.id,
       name: companies.name,
+      adminEmail: companies.adminEmail,
     })
     .from(companyUsers)
     .innerJoin(companies, eq(companyUsers.companyId, companies.id))
@@ -27,6 +27,8 @@ export default async function DashboardPage() {
     .then((r) => r[0] ?? null);
 
   if (!firma) redirect("/");
+
+  const isBoss = email === firma.adminEmail;
 
   const urunler = await db
     .select()
@@ -38,6 +40,75 @@ export default async function DashboardPage() {
 
   // Server Action binder — companyId'yi closure olarak geç
   const addProductWithId = addProduct.bind(null, firma.id);
+
+  // --- Executive Analytics ---
+  let deadStockReport = null;
+  let monthlyChampion = null;
+
+  if (isBoss) {
+    // 1) Cash Trap Radar (90 Days Inactive)
+    const ninetyDaysAgo = new Date();
+    ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+    const dateStr = ninetyDaysAgo.toISOString();
+
+    // Products with 'out' movements in last 90 days
+    const activeProductIds = await db
+      .selectDistinct({ productId: stockMovements.productId })
+      .from(stockMovements)
+      .where(
+        and(
+          eq(stockMovements.companyId, firma.id),
+          eq(stockMovements.type, "out"),
+          gt(stockMovements.createdAt, dateStr)
+        )
+      )
+      .then((rows) => rows.map((r) => r.productId));
+
+    const deadStockProducts = activeProductIds.length > 0 
+      ? urunler.filter(u => u.currentStock > 0 && !activeProductIds.includes(u.id))
+      : urunler.filter(u => u.currentStock > 0);
+
+    if (deadStockProducts.length > 0) {
+      const totalLockedCash = deadStockProducts.reduce((acc, u) => acc + (u.currentStock * u.price), 0);
+      deadStockReport = {
+        count: deadStockProducts.length,
+        totalValue: totalLockedCash,
+      };
+    }
+
+    // 2) Monthly Record
+    const firstDayOfMonth = new Date();
+    firstDayOfMonth.setDate(1);
+    firstDayOfMonth.setHours(0, 0, 0, 0);
+    const monthStartStr = firstDayOfMonth.toISOString();
+
+    const topMovement = await db
+      .select({
+        productId: stockMovements.productId,
+        totalQty: sql<number>`SUM(${stockMovements.quantity})`,
+      })
+      .from(stockMovements)
+      .where(
+        and(
+          eq(stockMovements.companyId, firma.id),
+          gt(stockMovements.createdAt, monthStartStr)
+        )
+      )
+      .groupBy(stockMovements.productId)
+      .orderBy(desc(sql`SUM(${stockMovements.quantity})`))
+      .limit(1)
+      .then(r => r[0]);
+
+    if (topMovement) {
+      const championProduct = urunler.find(u => u.id === topMovement.productId);
+      if (championProduct) {
+        monthlyChampion = {
+          name: championProduct.name,
+          qty: topMovement.totalQty,
+        };
+      }
+    }
+  }
 
   return (
     <div className="space-y-8">
@@ -64,6 +135,50 @@ export default async function DashboardPage() {
           </div>
         </div>
       </div>
+
+      {/* --- Yönetici Özeti (RBAC) --- */}
+      {isBoss && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Ölü Stok Kartı */}
+          <div className="bg-gradient-to-br from-red-500/10 to-transparent border border-red-500/20 rounded-2xl p-6 shadow-xl">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-xl bg-red-500/20 border border-red-500/30 flex items-center justify-center">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f87171" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+              </div>
+              <h3 className="text-red-400 font-bold">Nakit Tuzağı (Ölü Stok)</h3>
+            </div>
+            {deadStockReport ? (
+              <p className="text-slate-300 text-sm leading-relaxed">
+                Dikkat: Son 3 aydır hareketsiz olan <span className="text-white font-bold">{deadStockReport.count} kalem</span> ürününüz deponuzda <span className="text-red-400 font-bold">{deadStockReport.totalValue.toLocaleString("tr-TR")} TL&apos;lik</span> sermayeyi kilitliyor!
+              </p>
+            ) : (
+              <p className="text-slate-400 text-sm italic">Şu an için ölü stok tespit edilmedi.</p>
+            )}
+          </div>
+
+          {/* Ayın En Hareketli Ürünü */}
+          <div className="bg-gradient-to-br from-violet-500/10 to-transparent border border-violet-500/20 rounded-2xl p-6 shadow-xl">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-xl bg-violet-500/20 border border-violet-500/30 flex items-center justify-center">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>
+                </svg>
+              </div>
+              <h3 className="text-violet-400 font-bold">Ayın Rekortmeni</h3>
+            </div>
+            {monthlyChampion ? (
+              <div>
+                <p className="text-white font-semibold text-lg">{monthlyChampion.name}</p>
+                <p className="text-slate-400 text-sm mt-1">Bu ay toplam {monthlyChampion.qty} adet hareket gördü.</p>
+              </div>
+            ) : (
+              <p className="text-slate-400 text-sm italic">Bu ay henüz yeterli hareket yok.</p>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* ─── Yeni Ürün Ekleme Formu ─── */}
       <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl shadow-black/30">
@@ -141,6 +256,26 @@ export default async function DashboardPage() {
                 className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all"
               />
             </div>
+
+            {/* Birim Fiyat */}
+            <div>
+              <label
+                htmlFor="product-price"
+                className="block text-xs font-medium text-slate-400 mb-1.5"
+              >
+                Birim Fiyat (TL)
+              </label>
+              <input
+                id="product-price"
+                name="price"
+                type="number"
+                step="0.01"
+                min="0"
+                defaultValue="0"
+                placeholder="0.00"
+                className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all"
+              />
+            </div>
           </div>
 
           <div className="mt-4 flex justify-end">
@@ -212,6 +347,16 @@ export default async function DashboardPage() {
                   <th className="text-right text-xs font-semibold text-slate-500 uppercase tracking-wider px-6 py-3">
                     Mevcut Stok
                   </th>
+                  {isBoss && (
+                    <>
+                      <th className="text-right text-xs font-semibold text-slate-500 uppercase tracking-wider px-6 py-3">
+                        Birim Fiyat
+                      </th>
+                      <th className="text-right text-xs font-semibold text-slate-500 uppercase tracking-wider px-6 py-3">
+                        Toplam Değer
+                      </th>
+                    </>
+                  )}
                   <th className="text-right text-xs font-semibold text-slate-500 uppercase tracking-wider px-6 py-3">
                     Durum
                   </th>
@@ -266,6 +411,22 @@ export default async function DashboardPage() {
                         </span>
                         <span className="text-slate-500 text-xs ml-1">adet</span>
                       </td>
+
+                      {/* RBAC Fiyat Sütunları */}
+                      {isBoss && (
+                        <>
+                          <td className="px-6 py-4 text-right">
+                            <span className="text-white text-sm font-medium tabular-nums">
+                              {urun.price.toLocaleString("tr-TR")} TL
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-right">
+                            <span className="text-emerald-400 text-sm font-bold tabular-nums">
+                              {((urun.currentStock ?? 0) * urun.price).toLocaleString("tr-TR")} TL
+                            </span>
+                          </td>
+                        </>
+                      )}
 
                       {/* Durum Badge */}
                       <td className="px-6 py-4 text-right">

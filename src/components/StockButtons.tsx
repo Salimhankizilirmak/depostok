@@ -17,10 +17,12 @@ export default function StockButtons({
   const [isPending, startTransition] = useTransition();
   const [modal, setModal] = useState<{ type: "in" | "out" } | null>(null);
   const [quantity, setQuantity] = useState("1");
+  const [description, setDescription] = useState("");
   const [error, setError] = useState("");
 
   function openModal(type: "in" | "out") {
     setQuantity("1");
+    setDescription("");
     setError("");
     setModal({ type });
   }
@@ -36,8 +38,12 @@ export default function StockButtons({
       setError("Geçerli bir miktar girin.");
       return;
     }
+    if (!description.trim()) {
+      setError("Açıklama zorunludur.");
+      return;
+    }
     startTransition(async () => {
-      await updateStock(productId, companyId, modal!.type, qty);
+      await updateStock(productId, companyId, modal!.type, qty, description.trim());
       closeModal();
     });
   }
@@ -124,9 +130,17 @@ export default function StockButtons({
               min="1"
               value={quantity}
               onChange={(e) => { setQuantity(e.target.value); setError(""); }}
-              onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-              autoFocus
-              className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-sm outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 transition-all tabular-nums"
+              className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-sm outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 transition-all tabular-nums mb-4"
+            />
+
+            <label className="block text-xs font-medium text-slate-400 mb-1.5">
+              İşlem Açıklaması
+            </label>
+            <textarea
+              value={description}
+              onChange={(e) => { setDescription(e.target.value); setError(""); }}
+              placeholder="Örn: Müşteri satışı, Yeni sevkiyat..."
+              className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-sm outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 transition-all min-h-[80px] resize-none"
             />
             {error && <p className="text-red-400 text-xs mt-1.5">{error}</p>}
 
