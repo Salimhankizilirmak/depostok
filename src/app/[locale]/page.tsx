@@ -98,24 +98,69 @@ export default function Home() {
           </Link>
         </div>
 
-        {/* Dashboard Preview Mockup */}
-        <div className="mt-24 relative max-w-5xl w-full">
-          <div className="absolute inset-0 bg-violet-500/10 blur-[100px] pointer-events-none rounded-full" />
-          <div className="relative bg-slate-900 border border-slate-800 rounded-3xl p-4 shadow-2xl shadow-black">
-             <div className="bg-slate-950 rounded-2xl overflow-hidden border border-slate-800/50 aspect-video flex flex-col">
-                <div className="h-10 border-b border-slate-800/50 flex items-center px-4 gap-2">
-                   <div className="w-2 h-2 rounded-full bg-red-500/50" />
-                   <div className="w-2 h-2 rounded-full bg-amber-500/50" />
-                   <div className="w-2 h-2 rounded-full bg-emerald-500/50" />
-                 </div>
-                 <div className="flex-1 p-8 grid grid-cols-3 gap-6 opacity-40 grayscale">
-                   <div className="h-24 bg-slate-900 rounded-xl" />
-                   <div className="h-24 bg-slate-900 rounded-xl" />
-                   <div className="h-24 bg-slate-900 rounded-xl" />
-                   <div className="col-span-3 h-48 bg-slate-900 rounded-xl" />
-                 </div>
-             </div>
+        {/* Novexis Tech Showcase / Hero Preview */}
+        <div className="mt-24 relative max-w-6xl w-full group">
+          {/* Animated Glow Backdrops */}
+          <div className="absolute -top-10 -left-10 w-72 h-72 bg-violet-600/30 blur-[120px] rounded-full pointer-events-none group-hover:bg-violet-600/40 transition-colors duration-700" />
+          <div className="absolute -bottom-10 -right-10 w-72 h-72 bg-emerald-600/20 blur-[120px] rounded-full pointer-events-none group-hover:bg-emerald-600/30 transition-colors duration-700" />
+
+          {/* Premium Browser Frame */}
+          <div className="relative bg-slate-900/40 border border-slate-800 rounded-[2.5rem] p-3 shadow-2xl shadow-black/80 backdrop-blur-md overflow-hidden transform transition-all duration-700 hover:scale-[1.01] hover:shadow-violet-500/10 active:scale-[0.995]">
+            <div className="bg-slate-950/90 rounded-[1.8rem] overflow-hidden border border-slate-800/80 flex flex-col aspect-[16/10] sm:aspect-video relative group/browser">
+              
+              {/* Browser Header */}
+              <div className="h-12 border-b border-white/5 bg-slate-900/50 flex items-center px-6 gap-3 relative z-20">
+                <div className="flex gap-2">
+                  <div className="w-3 h-3 rounded-full bg-red-500/80 shadow-[0_0_8px_rgba(239,68,68,0.4)]" />
+                  <div className="w-3 h-3 rounded-full bg-amber-500/80 shadow-[0_0_8px_rgba(245,158,11,0.4)]" />
+                  <div className="w-3 h-3 rounded-full bg-emerald-500/80 shadow-[0_0_8px_rgba(16,185,129,0.4)]" />
+                </div>
+                <div className="flex-1 flex justify-center">
+                  <div className="bg-slate-950/50 border border-white/5 px-4 py-1 rounded-lg flex items-center gap-2 max-w-[280px] w-full">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                    </svg>
+                    <span className="text-[10px] text-slate-500 truncate font-medium tracking-wide">stok.novexistech.com</span>
+                  </div>
+                </div>
+                <div className="w-16" /> {/* Spacer */}
+              </div>
+
+              {/* Website Content (Screenshot) */}
+              <div className="flex-1 bg-slate-950 relative overflow-hidden group-hover/browser:cursor-pointer">
+                <div className="absolute inset-0 bg-gradient-to-tr from-violet-600/5 to-transparent pointer-events-none z-10" />
+                
+                {/* Image Wrapper with Parallax Hover Effect */}
+                <div className="w-full h-full relative transition-transform duration-1000 group-hover/browser:scale-105">
+                  <img 
+                    src="/images/novexistech.png" 
+                    alt="Novexis Tech Showcase" 
+                    className="w-full h-full object-cover object-top opacity-90 group-hover/browser:opacity-100 transition-opacity duration-700"
+                  />
+                </div>
+
+                {/* Glass Overlay on Hover */}
+                <div className="absolute inset-0 bg-slate-950/0 group-hover/browser:bg-slate-950/10 transition-colors duration-500 z-20" />
+                
+                {/* Tech Badges Over Image */}
+                <div className="absolute bottom-6 left-6 flex flex-wrap gap-2 z-30">
+                  {["Yazılım", "Otomasyon", "Yapay Zeka"].map((tech) => (
+                    <span key={tech} className="px-3 py-1 bg-white/5 border border-white/10 backdrop-blur-md rounded-full text-[10px] font-bold text-white/70 tracking-widest uppercase">
+                      {tech}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Subtle Gradient Border Glow */}
+            <div className="absolute -inset-1 bg-gradient-to-r from-violet-500/20 to-emerald-500/20 rounded-[2.6rem] blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 -z-10" />
           </div>
+
+          {/* Decorative Floating Elements */}
+          <div className="absolute -right-6 top-1/4 w-32 h-32 bg-indigo-500/20 border border-white/5 backdrop-blur-2xl rounded-3xl -rotate-12 -z-10 animate-pulse" />
+          <div className="absolute -left-12 bottom-1/4 w-40 h-40 bg-violet-600/10 border border-white/5 backdrop-blur-3xl rounded-full -z-10" />
         </div>
       </main>
 
