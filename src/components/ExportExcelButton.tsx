@@ -3,7 +3,7 @@
 import * as XLSX from "xlsx";
 
 interface ExportExcelButtonProps {
-  data: any[];
+  data: Record<string, unknown>[];
   fileName: string;
 }
 

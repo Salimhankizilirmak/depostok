@@ -1,6 +1,6 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { db } from "@/db";
-import { companies, products, companyUsers, stockMovements } from "@/db/schema";
+import { products, stockMovements } from "@/db/schema";
 import { eq, and, gt, desc, sql } from "drizzle-orm";
 import { addProduct } from "./actions";
 import StockButtons from "@/components/StockButtons";
@@ -23,7 +23,6 @@ export default async function DashboardPage() {
   const t = await getTranslations("Dashboard");
 
   // RBAC yetkileri
-  const isManager = firma.userRole === "Yönetici";
   const canSeePrices = firma.userRole === "Yönetici" || firma.userRole === "Yetkili";
 
   const urunler = await db

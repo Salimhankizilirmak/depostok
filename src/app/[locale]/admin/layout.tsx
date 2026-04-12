@@ -2,6 +2,7 @@ import { UserButton } from "@clerk/nextjs";
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 export default async function AdminLayout({ children }: { children: ReactNode }) {
   const user = await currentUser();
@@ -47,6 +48,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
 
           {/* Sağ taraf */}
           <div className="flex items-center gap-4">
+            <LanguageSwitcher />
             <span className="hidden sm:inline-flex items-center gap-1.5 text-xs font-medium text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-3 py-1">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
               Canlı

@@ -1,7 +1,7 @@
 import { db } from "@/db";
 import { companies, companyUsers } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
-import { redirect, notFound } from "next/navigation";
+import { notFound } from "next/navigation";
 import TeamManagement from "@/components/TeamManagement";
 import { 
   addMemberToCompanySA, 
@@ -13,11 +13,7 @@ import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
-interface CompanyDetailPageProps {
-  params: {
-    id: string;
-  };
-}
+
 
 export default async function CompanyDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

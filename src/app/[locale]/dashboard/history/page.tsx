@@ -1,6 +1,6 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { db } from "@/db";
-import { companies, stockMovements, products, companyUsers } from "@/db/schema";
+import { stockMovements, products } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import ExportExcelButton from "@/components/ExportExcelButton";

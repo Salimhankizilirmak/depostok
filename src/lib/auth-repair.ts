@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { companies, companyUsers } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 
 /**
  * Kullanıcıyı hem company_users tablosunda hem de bağlı olduğu firma bilgisinde arar.

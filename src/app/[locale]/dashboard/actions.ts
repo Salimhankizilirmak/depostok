@@ -66,7 +66,7 @@ export async function updateStock(
 
   // 3) Kritik stok kontrolü (Refetch updated stock and company admin info)
   if (type === "out") {
-    const updatedProduct = await db
+    const [updatedProduct] = await db
       .select({
         name: products.name,
         currentStock: products.currentStock,
@@ -76,8 +76,7 @@ export async function updateStock(
       .from(products)
       .innerJoin(companies, eq(products.companyId, companies.id))
       .where(eq(products.id, productId))
-      .limit(1)
-      .then((r: any[]) => r[0] ?? null);
+      .limit(1);
 
     if (updatedProduct && updatedProduct.currentStock <= updatedProduct.criticalThreshold) {
       try {

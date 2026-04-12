@@ -1,12 +1,8 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { UserButton } from "@clerk/nextjs";
-import { db } from "@/db";
-import { companies, companyUsers } from "@/db/schema";
-import { eq } from "drizzle-orm";
 import type { ReactNode } from "react";
 import DashboardNav from "@/components/DashboardNav";
 import { getCompanyAndRole } from "@/lib/auth-repair";
-import { useTranslations } from "next-intl";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { getTranslations } from "next-intl/server";
 

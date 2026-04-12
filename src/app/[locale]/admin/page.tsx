@@ -144,7 +144,7 @@ export default async function AdminPage() {
             ) : (
               <div className="overflow-x-auto">
                 <div className="divide-y divide-slate-800 min-w-[500px] md:min-w-0">
-                  {firmalar.map((firma, index) => (
+                  {firmalar.map((firma) => (
                     <div
                       key={firma.id}
                       className="px-6 py-4 flex items-center gap-4 hover:bg-slate-800/50 transition-colors"
