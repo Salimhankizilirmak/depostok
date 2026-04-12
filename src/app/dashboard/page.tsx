@@ -15,6 +15,7 @@ export default async function DashboardPage() {
 
   if (!email) redirect("/");
 
+  const firma = await db
     .select({
       id: companies.id,
       name: companies.name,
