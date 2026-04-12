@@ -1,6 +1,6 @@
 "use client";
 import { useTransition } from "react";
-import { updateUserRole } from "@/app/dashboard/team/actions";
+import { updateUserRole } from "@/actions/team";
 
 interface RoleSelectProps {
   userId: string;

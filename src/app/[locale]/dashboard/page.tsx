@@ -2,7 +2,7 @@ import { currentUser } from "@clerk/nextjs/server";
 import { db } from "@/db";
 import { products, stockMovements } from "@/db/schema";
 import { eq, and, gt, desc, sql } from "drizzle-orm";
-import { addProduct } from "./actions";
+import { addProduct } from "@/actions/dashboard";
 import StockButtons from "@/components/StockButtons";
 import ExportExcelButton from "@/components/ExportExcelButton";
 import { redirect } from "next/navigation";

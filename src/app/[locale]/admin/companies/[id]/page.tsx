@@ -7,7 +7,7 @@ import {
   addMemberToCompanySA, 
   updateMemberRoleSA, 
   deleteMemberFromCompanySA 
-} from "../../actions";
+} from "@/actions/admin";
 import { currentUser } from "@clerk/nextjs/server";
 import Link from "next/link";
 

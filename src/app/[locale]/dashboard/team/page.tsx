@@ -5,7 +5,7 @@ import { companyUsers } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { getCompanyAndRole } from "@/lib/auth-repair";
 import TeamManagement from "@/components/TeamManagement";
-import { addTeamMember, updateUserRole } from "./actions";
+import { addTeamMember, updateUserRole } from "@/actions/team";
 
 export const dynamic = "force-dynamic";
 

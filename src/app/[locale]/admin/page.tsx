@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { companies } from "@/db/schema";
-import { addCompany } from "./actions";
+import { addCompany } from "@/actions/admin";
 import { desc } from "drizzle-orm";
 import Link from "next/link";
 

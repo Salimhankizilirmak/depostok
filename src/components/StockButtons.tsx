@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { updateStock } from "@/app/dashboard/actions";
+import { updateStock } from "@/actions/dashboard";
 
 interface StockButtonsProps {
   productId: string;
