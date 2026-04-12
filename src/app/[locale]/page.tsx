@@ -1,7 +1,14 @@
+"use client";
+
 import Link from "next/link";
 import InstallPWA from "@/components/InstallPWA";
+import { useTranslations } from "next-intl";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 export default function Home() {
+  const t = useTranslations("Hero");
+  const navT = useTranslations("Navbar");
+
   return (
     <div className="min-h-screen bg-slate-950 text-white selection:bg-violet-500/30 overflow-hidden relative">
       {/* Arka Plan Efektleri (Glow) */}
@@ -29,12 +36,13 @@ export default function Home() {
         </div>
 
         <div className="flex items-center gap-4">
+          <LanguageSwitcher />
           <InstallPWA />
           <Link
             href="/dashboard"
             className="text-sm font-medium text-slate-400 hover:text-white transition-colors"
           >
-            Firma Girişi
+            {navT("login")}
           </Link>
         </div>
       </nav>
@@ -43,20 +51,25 @@ export default function Home() {
       <main className="relative z-10 max-w-7xl mx-auto px-6 pt-12 pb-20 md:pt-20 md:pb-32 flex flex-col items-center text-center">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900/50 border border-slate-800 text-[10px] md:text-xs font-medium text-slate-400 mb-8 backdrop-blur-sm">
           <span className="w-1.5 h-1.5 rounded-full bg-violet-500 animate-pulse" />
-          YENİ: Çoklu Kullanıcı Desteği Yayında
+          {t("badge")}
         </div>
 
         <h1 className="text-4xl md:text-7xl font-extrabold tracking-tight max-w-4xl mb-6 leading-[1.1]">
-          Şirket içi stok çözümleri{" "}
-          <span className="bg-clip-text text-transparent bg-gradient-to-r from-violet-400 to-indigo-500">
-            Leadnova
-          </span>{" "}
-          ile daha kolay
+          {t("title").includes("Leadnova") ? (
+            <>
+              {t("title").split("Leadnova")[0]}
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-violet-400 to-indigo-500">
+                Leadnova
+              </span>
+              {t("title").split("Leadnova")[1]}
+            </>
+          ) : (
+            t("title")
+          )}
         </h1>
 
         <p className="text-slate-400 text-base md:text-xl max-w-2xl mb-12 leading-relaxed">
-          Deponuzu akıllı, güvenli ve çok kullanıcılı sistemimizle anında yönetmeye başlayın. 
-          Stok hareketlerini takip edin, kritik seviyeleri izleyin.
+          {t("description")}
         </p>
 
         <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto px-4 sm:px-0">
@@ -64,7 +77,7 @@ export default function Home() {
             href="/dashboard"
             className="w-full sm:w-auto group relative px-8 py-4 bg-white text-slate-950 font-bold rounded-2xl transition-all hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-white/10"
           >
-            Sisteme Giriş Yap
+            {t("cta")}
           </Link>
           <a
             href="https://wa.me/905374064175"
@@ -75,13 +88,13 @@ export default function Home() {
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
             </svg>
-            Teknik Destek
+            {navT("support")}
           </a>
           <Link
             href="/admin"
             className="w-full sm:w-auto px-8 py-4 bg-slate-900/50 border border-slate-800 text-slate-300 font-bold rounded-2xl hover:bg-slate-800 hover:text-white transition-all backdrop-blur-sm"
           >
-            Super Admin
+            {navT("admin")}
           </Link>
         </div>
 
@@ -94,13 +107,13 @@ export default function Home() {
                    <div className="w-2 h-2 rounded-full bg-red-500/50" />
                    <div className="w-2 h-2 rounded-full bg-amber-500/50" />
                    <div className="w-2 h-2 rounded-full bg-emerald-500/50" />
-                </div>
-                <div className="flex-1 p-8 grid grid-cols-3 gap-6 opacity-40 grayscale">
+                 </div>
+                 <div className="flex-1 p-8 grid grid-cols-3 gap-6 opacity-40 grayscale">
                    <div className="h-24 bg-slate-900 rounded-xl" />
                    <div className="h-24 bg-slate-900 rounded-xl" />
                    <div className="h-24 bg-slate-900 rounded-xl" />
                    <div className="col-span-3 h-48 bg-slate-900 rounded-xl" />
-                </div>
+                 </div>
              </div>
           </div>
         </div>
@@ -110,12 +123,12 @@ export default function Home() {
       <footer className="relative z-10 border-t border-slate-900 py-12">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
           <p className="text-slate-500 text-sm">
-            © 2026 Leadnova Tech. Tüm hakları saklıdır.
+            © 2026 Leadnova Tech. All rights reserved.
           </p>
           <div className="flex items-center gap-8 text-slate-500 text-sm">
-            <span className="hover:text-white cursor-pointer">Gizlilik</span>
-            <span className="hover:text-white cursor-pointer">Şartlar</span>
-            <span className="hover:text-white cursor-pointer">İletişim</span>
+            <span className="hover:text-white cursor-pointer">Privacy</span>
+            <span className="hover:text-white cursor-pointer">Terms</span>
+            <span className="hover:text-white cursor-pointer">Contact</span>
           </div>
         </div>
       </footer>

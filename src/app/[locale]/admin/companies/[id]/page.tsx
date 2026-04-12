@@ -19,8 +19,8 @@ interface CompanyDetailPageProps {
   };
 }
 
-export default async function CompanyDetailPage({ params }: CompanyDetailPageProps) {
-  const { id } = params;
+export default async function CompanyDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const user = await currentUser();
   const email = user?.emailAddresses?.[0]?.emailAddress ?? null;
 

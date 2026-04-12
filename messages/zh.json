@@ -1,0 +1,61 @@
+{
+  "Navbar": {
+    "login": "登录",
+    "dashboard": "仪表板",
+    "support": "技术支持",
+    "admin": "超級管理員"
+  },
+  "Hero": {
+    "badge": "新功能：多用户支持已上线",
+    "title": "Leadnova 让企业库存解决方案更简单",
+    "description": "通过我们智能、安全、多用户的系统，立即开始管理您的仓库。追踪库存动态，监控关键水位。",
+    "cta": "进入系统"
+  },
+  "Dashboard": {
+    "welcome": "欢迎",
+    "status": "您的仓库目前处于安全状态。您可以在下方管理您的交易。您的系统已处于满负荷状态并经过优化。",
+    "deadStock": "资金占用",
+    "deadStockDesc": "{count} 个产品共占用 {value} TL 资金。",
+    "noDeadStock": "未发现滞销库存。",
+    "monthlyChampion": "本月冠军",
+    "monthlyChampionDesc": "{name} 本月以 {qty} 次变动位居榜首。",
+    "noChampion": "正在收集数据...",
+    "addProduct": "添加新产品",
+    "productName": "产品名称",
+    "sku": "库存单位 (SKU)",
+    "initialStock": "初始库存",
+    "unitPrice": "单价 (TL)",
+    "criticalLevel": "关键库存警报级别",
+    "saveProduct": "保存产品",
+    "productList": "产品列表",
+    "productCount": "{count} 个产品",
+    "totalValue": "总价值",
+    "statusLabel": "状态",
+    "actions": "操作",
+    "outOfStock": "缺货",
+    "critical": "关键",
+    "sufficient": "充足",
+    "accessDenied": "拒绝访问",
+    "noCompanyFound": "未找到与此电子邮件地址关联的授权公司帐户。请联系您的系统管理员。"
+  },
+  "Navigation": {
+    "products": "产品",
+    "history": "库存历史",
+    "team": "团队"
+  },
+  "Admin": {
+    "title": "公司管理",
+    "description": "查看所有注册公司并添加新公司。",
+    "addCompany": "添加新公司",
+    "companyName": "公司名称",
+    "adminEmail": "管理员电子邮件",
+    "saveCompany": "保存公司",
+    "totalCompanies": "公司总数",
+    "registered": "已在系统中注册",
+    "registeredCompanies": "已注册公司",
+    "manage": "管理",
+    "back": "返回",
+    "management": "管理",
+    "manageDesc": "控制公司团队成员、角色和访问权限。"
+  }
+}

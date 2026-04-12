@@ -6,6 +6,9 @@ import { eq } from "drizzle-orm";
 import type { ReactNode } from "react";
 import DashboardNav from "@/components/DashboardNav";
 import { getCompanyAndRole } from "@/lib/auth-repair";
+import { useTranslations } from "next-intl";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
+import { getTranslations } from "next-intl/server";
 
 export default async function DashboardLayout({
   children,
@@ -16,6 +19,8 @@ export default async function DashboardLayout({
   const email = user?.emailAddresses?.[0]?.emailAddress ?? null;
 
   const firma = email ? await getCompanyAndRole(email) : null;
+
+  const t = await getTranslations("Dashboard");
 
   // ── Yetkisiz erişim ──────────────────────────────────────────────────────────
   if (!firma) {
@@ -38,10 +43,9 @@ export default async function DashboardLayout({
               <line x1="12" y1="16" x2="12.01" y2="16" />
             </svg>
           </div>
-          <h2 className="text-white font-bold text-lg mb-2">Erişim Reddedildi</h2>
+          <h2 className="text-white font-bold text-lg mb-2">{t("accessDenied")}</h2>
           <p className="text-slate-400 text-sm leading-relaxed">
-            Bu e-posta adresine tanımlı bir yetkili firma hesabı bulunamadı.
-            Lütfen sistem yöneticinizle iletişime geçin.
+            {t("noCompanyFound")}
           </p>
           {email && (
             <p className="mt-4 inline-flex items-center gap-2 text-xs text-slate-500 bg-slate-800 rounded-lg px-3 py-2">
@@ -74,13 +78,14 @@ export default async function DashboardLayout({
                 {firma.name}
               </span>
               <span className="block text-slate-500 text-[10px] sm:text-xs">
-                Firma Paneli
+                {t("companyPanel")}
               </span>
             </div>
           </div>
 
           {/* Sağ taraf */}
           <div className="flex items-center gap-4">
+            <LanguageSwitcher />
             {/* Navigasyon linkleri */}
             <DashboardNav userRole={firma.userRole} />
             <div className="h-5 w-px bg-slate-800" />

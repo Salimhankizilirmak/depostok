@@ -2,19 +2,21 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-
-const links = [
-  { href: "/dashboard", label: "Ürünler" },
-  { href: "/dashboard/history", label: "Stok Geçmişi" },
-  { href: "/dashboard/team", label: "Ekibim" },
-];
+import { useTranslations } from "next-intl";
 
 interface DashboardNavProps {
   userRole?: string;
 }
 
 export default function DashboardNav({ userRole }: DashboardNavProps) {
+  const t = useTranslations("Navigation");
   const pathname = usePathname();
+
+  const links = [
+    { href: "/dashboard", label: t("products") },
+    { href: "/dashboard/history", label: t("history") },
+    { href: "/dashboard/team", label: t("team") },
+  ];
 
   const filteredLinks = links.filter((link) => {
     if (link.href === "/dashboard/team") {
@@ -27,10 +29,11 @@ export default function DashboardNav({ userRole }: DashboardNavProps) {
     <nav className="flex items-center gap-1 overflow-x-auto no-scrollbar pb-1 sm:pb-0">
       <div className="flex items-center gap-1 min-w-max">
         {filteredLinks.map((link) => {
-          const isActive =
-            link.href === "/dashboard"
-              ? pathname === "/dashboard"
-              : pathname.startsWith(link.href);
+          // We need to handle the locale prefix in the pathname check
+          // The links themselves are currently not locale-prefixed in the href
+          // but next-intl's Link (if we used it) or our middleware handles redirection.
+          // For now, let's keep the logic simple as it's a sub-path within [locale]
+          const isActive = pathname.includes(link.href);
 
           return (
             <Link

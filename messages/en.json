@@ -1,0 +1,61 @@
+{
+  "Navbar": {
+    "login": "Login",
+    "dashboard": "Dashboard",
+    "support": "Support",
+    "admin": "Super Admin"
+  },
+  "Hero": {
+    "badge": "NEW: Multi-User Support is Live",
+    "title": "Corporate stock solutions are easier with Leadnova",
+    "description": "Start managing your warehouse instantly with our smart, secure, and multi-user system. Track stock movements, monitor critical levels.",
+    "cta": "Enter System"
+  },
+  "Dashboard": {
+    "welcome": "Welcome",
+    "status": "Your warehouse is safe. You can manage your transactions below. Your system is now at full capacity and optimized.",
+    "deadStock": "Cash Trap",
+    "deadStockDesc": "{count} products are locking {value} TL of capital in total.",
+    "noDeadStock": "No dead stock found.",
+    "monthlyChampion": "Monthly Champion",
+    "monthlyChampionDesc": "{name} is at the top with {qty} movements this month.",
+    "noChampion": "Collecting data...",
+    "addProduct": "Add New Product",
+    "productName": "Product Name",
+    "sku": "Stock Code (SKU)",
+    "initialStock": "Initial Stock",
+    "unitPrice": "Unit Price (TL)",
+    "criticalLevel": "Critical Stock Warning Level",
+    "saveProduct": "Save Product",
+    "productList": "Product List",
+    "productCount": "{count} products",
+    "totalValue": "Total Value",
+    "statusLabel": "Status",
+    "actions": "Actions",
+    "outOfStock": "Out of Stock",
+    "critical": "Critical",
+    "sufficient": "Sufficient",
+    "accessDenied": "Access Denied",
+    "noCompanyFound": "No authorized company account defined for this email address. Please contact your system administrator."
+  },
+  "Navigation": {
+    "products": "Products",
+    "history": "Stock History",
+    "team": "Our Team"
+  },
+  "Admin": {
+    "title": "Company Management",
+    "description": "View all registered companies and add new ones.",
+    "addCompany": "Add New Company",
+    "companyName": "Company Name",
+    "adminEmail": "Admin Email",
+    "saveCompany": "Save Company",
+    "totalCompanies": "Total Companies",
+    "registered": "registered in system",
+    "registeredCompanies": "Registered Companies",
+    "manage": "Manage",
+    "back": "Back",
+    "management": "Management",
+    "manageDesc": "Control company team members, roles and access permissions."
+  }
+}

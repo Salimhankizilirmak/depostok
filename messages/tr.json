@@ -1,0 +1,61 @@
+{
+  "Navbar": {
+    "login": "Firma Girişi",
+    "dashboard": "Panel",
+    "support": "Teknik Destek",
+    "admin": "Super Admin"
+  },
+  "Hero": {
+    "badge": "YENİ: Çoklu Kullanıcı Desteği Yayında",
+    "title": "Şirket içi stok çözümleri Leadnova ile daha kolay",
+    "description": "Deponuzu akıllı, güvenli ve çok kullanıcılı sistemimizle anında yönetmeye başlayın. Stok hareketlerini takip edin, kritik seviyeleri izleyin.",
+    "cta": "Sisteme Giriş Yap"
+  },
+  "Dashboard": {
+    "welcome": "Hoş Geldiniz",
+    "status": "Deponuz güvende. İşlemlerinizi aşağıdan yönetebilirsiniz. Sisteminiz şu an tam kapasite ve optimize durumda.",
+    "deadStock": "Nakit Tuzağı",
+    "deadStockDesc": "{count} ürün toplamda {value} TL sermayeyi kilitliyor.",
+    "noDeadStock": "Ölü stok bulunamadı.",
+    "monthlyChampion": "Ayın Rekortmeni",
+    "monthlyChampionDesc": "{name} ürünü bu ay {qty} hareketle zirvede.",
+    "noChampion": "Veri toplanıyor...",
+    "addProduct": "Yeni Ürün Ekle",
+    "productName": "Ürün Adı",
+    "sku": "Stok Kodu (SKU)",
+    "initialStock": "Başlangıç Stoğu",
+    "unitPrice": "Birim Fiyat (TL)",
+    "criticalLevel": "Kritik Stok Uyarı Seviyesi",
+    "saveProduct": "Ürünü Kaydet",
+    "productList": "Ürün Listesi",
+    "productCount": "{count} ürün",
+    "totalValue": "Toplam Değer",
+    "statusLabel": "Durum",
+    "actions": "İşlemler",
+    "outOfStock": "Tükendi",
+    "critical": "Kritik",
+    "sufficient": "Yeterli",
+    "accessDenied": "Erişim Reddedildi",
+    "noCompanyFound": "Bu e-posta adresine tanımlı bir yetkili firma hesabı bulunamadı. Lütfen sistem yöneticinizle iletişime geçin."
+  },
+  "Navigation": {
+    "products": "Ürünler",
+    "history": "Stok Geçmişi",
+    "team": "Ekibim"
+  },
+  "Admin": {
+    "title": "Firma Yönetimi",
+    "description": "Sisteme kayıtlı tüm firmaları görüntüle ve yeni firma ekle.",
+    "addCompany": "Yeni Firma Ekle",
+    "companyName": "Firma Adı",
+    "adminEmail": "Admin E-posta",
+    "saveCompany": "Firmayı Kaydet",
+    "totalCompanies": "Toplam Firma",
+    "registered": "sistemde kayıtlı",
+    "registeredCompanies": "Kayıtlı Firmalar",
+    "manage": "Yönet",
+    "back": "Geri Dön",
+    "management": "Yönetimi",
+    "manageDesc": "Firmanın ekip üyelerini, rollerini ve erişim yetkilerini kontrol edin."
+  }
+}
