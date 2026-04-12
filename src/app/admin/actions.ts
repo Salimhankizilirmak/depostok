@@ -22,6 +22,7 @@ export async function addCompany(formData: FormData) {
   await db.insert(companyUsers).values({
     companyId: newCompany.id,
     email: adminEmail.trim(),
+    role: "Yönetici",
   });
 
   revalidatePath("/admin");

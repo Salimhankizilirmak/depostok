@@ -9,13 +9,24 @@ const links = [
   { href: "/dashboard/team", label: "Ekibim" },
 ];
 
-export default function DashboardNav() {
+interface DashboardNavProps {
+  userRole?: string;
+}
+
+export default function DashboardNav({ userRole }: DashboardNavProps) {
   const pathname = usePathname();
+
+  const filteredLinks = links.filter((link) => {
+    if (link.href === "/dashboard/team") {
+      return userRole === "Yönetici";
+    }
+    return true;
+  });
 
   return (
     <nav className="flex items-center gap-1 overflow-x-auto no-scrollbar pb-1 sm:pb-0">
       <div className="flex items-center gap-1 min-w-max">
-        {links.map((link) => {
+        {filteredLinks.map((link) => {
           const isActive =
             link.href === "/dashboard"
               ? pathname === "/dashboard"

@@ -4,6 +4,7 @@ import { companies, companyUsers } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { addTeamMember } from "./actions";
 import { redirect } from "next/navigation";
+import RoleSelect from "@/components/RoleSelect";
 
 export const dynamic = "force-dynamic";
 
@@ -16,6 +17,8 @@ export default async function TeamPage() {
     .select({
       id: companies.id,
       name: companies.name,
+      adminEmail: companies.adminEmail,
+      currentUserRole: companyUsers.role,
     })
     .from(companyUsers)
     .innerJoin(companies, eq(companyUsers.companyId, companies.id))
@@ -24,6 +27,11 @@ export default async function TeamPage() {
     .then((r) => r[0] ?? null);
 
   if (!firma) redirect("/");
+
+  // Sadece 'Yönetici' olanlar bu sayfaya girebilir
+  if (firma.currentUserRole !== "Yönetici") {
+    redirect("/dashboard");
+  }
 
   const ekip = await db
     .select()
@@ -70,6 +78,22 @@ export default async function TeamPage() {
                   className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 transition-all"
                 />
               </div>
+              <div>
+                <label className="block text-xs font-medium text-slate-400 mb-1.5">
+                  Rol / Yetki
+                </label>
+                <select
+                  name="role"
+                  required
+                  className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-violet-500 transition-all cursor-pointer"
+                >
+                  <option value="Personel">Personel</option>
+                  <option value="Depocu">Depocu</option>
+                  <option value="Mühendis">Mühendis</option>
+                  <option value="Yetkili">Yetkili</option>
+                  <option value="Yönetici">Yönetici</option>
+                </select>
+              </div>
               <button
                 type="submit"
                 className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-semibold text-sm rounded-xl py-2.5 transition-all shadow-lg shadow-violet-500/25 active:scale-[0.98]"
@@ -103,7 +127,13 @@ export default async function TeamPage() {
                        </div>
                        <div>
                           <p className="text-white text-sm font-medium">{uye.email}</p>
-                          <p className="text-slate-500 text-[10px] uppercase tracking-wider font-semibold mt-0.5">Personel</p>
+                          <div className="mt-1">
+                             <RoleSelect 
+                                userId={uye.id} 
+                                currentRole={uye.role} 
+                                isSelf={uye.email === email} 
+                             />
+                          </div>
                        </div>
                     </div>
                     <div className="text-right">

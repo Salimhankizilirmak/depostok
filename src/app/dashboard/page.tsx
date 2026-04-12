@@ -20,6 +20,7 @@ export default async function DashboardPage() {
       id: companies.id,
       name: companies.name,
       adminEmail: companies.adminEmail,
+      userRole: companyUsers.role,
     })
     .from(companyUsers)
     .innerJoin(companies, eq(companyUsers.companyId, companies.id))
@@ -29,7 +30,9 @@ export default async function DashboardPage() {
 
   if (!firma) redirect("/");
 
-  const isBoss = email === firma.adminEmail;
+  // RBAC yetkileri
+  const isManager = firma.userRole === "Yönetici";
+  const canSeePrices = firma.userRole === "Yönetici" || firma.userRole === "Yetkili";
 
   const urunler = await db
     .select()
@@ -46,7 +49,7 @@ export default async function DashboardPage() {
   let deadStockReport = null;
   let monthlyChampion = null;
 
-  if (isBoss) {
+  if (canSeePrices) {
     // 1) Cash Trap Radar (90 Days Inactive)
     const ninetyDaysAgo = new Date();
     ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
@@ -113,73 +116,66 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-8">
-      {/* Sayfa Başlığı */}
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">
-            Stok Yönetimi
-          </h1>
-          <p className="text-slate-400 text-sm mt-1">
-            {firma.name} firmasına ait ürün ve stok bilgilerini yönet.
-          </p>
-        </div>
+      {/* ─── Hero Banner & Hoş Geldiniz Kartı ─── */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-violet-600 to-emerald-600 rounded-3xl p-8 shadow-2xl shadow-violet-500/20">
+        {/* Dekoratif Arka Plan Efektleri */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 blur-[80px] rounded-full -translate-y-1/2 translate-x-1/3" />
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-emerald-400/10 blur-[80px] rounded-full translate-y-1/2 -translate-x-1/3" />
 
-        {/* Özet istatistikler */}
-        <div className="hidden sm:flex items-center gap-3">
-          <div className="bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-center min-w-[90px]">
-            <p className="text-2xl font-bold text-white">{urunler.length}</p>
-            <p className="text-slate-500 text-xs mt-0.5">Ürün</p>
+        <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
+          <div className="max-w-xl">
+            <h2 className="text-3xl md:text-4xl font-extrabold text-white mb-3">
+              Hoş Geldiniz, {email?.split('@')[0]}
+            </h2>
+            <p className="text-indigo-100/80 text-lg font-medium leading-relaxed">
+              Deponuz güvende. İşlemlerinizi aşağıdan yönetebilirsiniz. Sisteminiz şu an tam kapasite ve optimize durumda.
+            </p>
           </div>
-          <div className="bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-center min-w-[90px]">
-            <p className="text-2xl font-bold text-emerald-400">{toplamStok}</p>
-            <p className="text-slate-500 text-xs mt-0.5">Toplam Stok</p>
-          </div>
+
+          {/* Analytics Cards (Only for privileged users) */}
+          {canSeePrices && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full md:w-auto">
+              {/* Ölü Stok Kartı (Nakit Tuzağı) */}
+              <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-5 min-w-[240px]">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-8 h-8 rounded-lg bg-red-500/30 border border-red-500/40 flex items-center justify-center">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                    </svg>
+                  </div>
+                  <h3 className="text-white text-sm font-bold">Nakit Tuzağı</h3>
+                </div>
+                {deadStockReport ? (
+                  <p className="text-white/90 text-[11px] leading-snug">
+                    <span className="font-bold">{deadStockReport.count} ürün</span> toplamda <span className="font-bold text-red-200">{deadStockReport.totalValue.toLocaleString("tr-TR")} TL</span> sermayeyi kilitliyor.
+                  </p>
+                ) : (
+                  <p className="text-white/60 text-[11px] italic">Ölü stok bulunamadı.</p>
+                )}
+              </div>
+
+              {/* Ayın Rekortmeni Kartı */}
+              <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-5 min-w-[240px]">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-8 h-8 rounded-lg bg-yellow-400/30 border border-yellow-400/40 flex items-center justify-center">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>
+                    </svg>
+                  </div>
+                  <h3 className="text-white text-sm font-bold">Ayın Rekortmeni</h3>
+                </div>
+                {monthlyChampion ? (
+                  <p className="text-white/90 text-[11px] leading-snug">
+                    <span className="font-bold">{monthlyChampion.name}</span> ürünü bu ay <span className="font-bold text-yellow-200">{monthlyChampion.qty}</span> hareketle zirvede.
+                  </p>
+                ) : (
+                  <p className="text-white/60 text-[11px] italic">Veri toplanıyor...</p>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </div>
-
-      {/* --- Yönetici Özeti (RBAC) --- */}
-      {isBoss && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Ölü Stok Kartı */}
-          <div className="bg-gradient-to-br from-red-500/10 to-transparent border border-red-500/20 rounded-2xl p-6 shadow-xl">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-red-500/20 border border-red-500/30 flex items-center justify-center">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f87171" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
-                </svg>
-              </div>
-              <h3 className="text-red-400 font-bold">Nakit Tuzağı (Ölü Stok)</h3>
-            </div>
-            {deadStockReport ? (
-              <p className="text-slate-300 text-sm leading-relaxed">
-                Dikkat: Son 3 aydır hareketsiz olan <span className="text-white font-bold">{deadStockReport.count} kalem</span> ürününüz deponuzda <span className="text-red-400 font-bold">{deadStockReport.totalValue.toLocaleString("tr-TR")} TL&apos;lik</span> sermayeyi kilitliyor!
-              </p>
-            ) : (
-              <p className="text-slate-400 text-sm italic">Şu an için ölü stok tespit edilmedi.</p>
-            )}
-          </div>
-
-          {/* Ayın En Hareketli Ürünü */}
-          <div className="bg-gradient-to-br from-violet-500/10 to-transparent border border-violet-500/20 rounded-2xl p-6 shadow-xl">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-violet-500/20 border border-violet-500/30 flex items-center justify-center">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>
-                </svg>
-              </div>
-              <h3 className="text-violet-400 font-bold">Ayın Rekortmeni</h3>
-            </div>
-            {monthlyChampion ? (
-              <div>
-                <p className="text-white font-semibold text-lg">{monthlyChampion.name}</p>
-                <p className="text-slate-400 text-sm mt-1">Bu ay toplam {monthlyChampion.qty} adet hareket gördü.</p>
-              </div>
-            ) : (
-              <p className="text-slate-400 text-sm italic">Bu ay henüz yeterli hareket yok.</p>
-            )}
-          </div>
-        </div>
-      )}
 
       {/* ─── Yeni Ürün Ekleme Formu ─── */}
       <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl shadow-black/30">
@@ -277,6 +273,25 @@ export default async function DashboardPage() {
                 className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all"
               />
             </div>
+
+            {/* Kritik Stok Seviyesi */}
+            <div>
+              <label
+                htmlFor="product-threshold"
+                className="block text-xs font-medium text-slate-400 mb-1.5"
+              >
+                Kritik Stok Uyarı Seviyesi
+              </label>
+              <input
+                id="product-threshold"
+                name="critical_threshold"
+                type="number"
+                min="0"
+                defaultValue="10"
+                placeholder="10"
+                className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all"
+              />
+            </div>
           </div>
 
           <div className="mt-4 flex justify-end">
@@ -348,7 +363,7 @@ export default async function DashboardPage() {
                   <th className="text-right text-xs font-semibold text-slate-500 uppercase tracking-wider px-6 py-3">
                     Mevcut Stok
                   </th>
-                  {isBoss && (
+                  {canSeePrices && (
                     <>
                       <th className="text-right text-xs font-semibold text-slate-500 uppercase tracking-wider px-6 py-3">
                         Birim Fiyat
@@ -368,17 +383,25 @@ export default async function DashboardPage() {
               </thead>
               <tbody className="divide-y divide-slate-800/60">
                 {urunler.map((urun) => {
+                  const currentStock = urun.currentStock ?? 0;
+                  const threshold = urun.criticalThreshold ?? 10;
+                  const isCritical = currentStock <= threshold;
+
                   const stokDurum =
-                    (urun.currentStock ?? 0) === 0
+                    currentStock === 0
                       ? { label: "Tükendi", color: "text-red-400 bg-red-500/10 border-red-500/20" }
-                      : (urun.currentStock ?? 0) < 10
+                      : isCritical
                       ? { label: "Kritik", color: "text-amber-400 bg-amber-500/10 border-amber-500/20" }
                       : { label: "Yeterli", color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20" };
 
                   return (
                     <tr
                       key={urun.id}
-                      className="hover:bg-slate-800/30 transition-colors"
+                      className={`transition-colors ${
+                        isCritical 
+                          ? "bg-red-500/5 hover:bg-red-500/10" 
+                          : "hover:bg-slate-800/30"
+                      }`}
                     >
                       {/* Ürün Adı */}
                       <td className="px-6 py-4">
@@ -414,7 +437,7 @@ export default async function DashboardPage() {
                       </td>
 
                       {/* RBAC Fiyat Sütunları */}
-                      {isBoss && (
+                      {canSeePrices && (
                         <>
                           <td className="px-6 py-4 text-right">
                             <span className="text-white text-sm font-medium tabular-nums">

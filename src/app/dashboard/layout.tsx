@@ -19,6 +19,7 @@ export default async function DashboardLayout({
         .select({
           id: companies.id,
           name: companies.name,
+          userRole: companyUsers.role,
         })
         .from(companyUsers)
         .innerJoin(companies, eq(companyUsers.companyId, companies.id))
@@ -92,7 +93,7 @@ export default async function DashboardLayout({
           {/* Sağ taraf */}
           <div className="flex items-center gap-4">
             {/* Navigasyon linkleri */}
-            <DashboardNav />
+            <DashboardNav userRole={firma.userRole} />
             <div className="h-5 w-px bg-slate-800" />
             <UserButton />
           </div>

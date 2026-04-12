@@ -7,9 +7,10 @@ import { revalidatePath } from "next/cache";
 
 export async function addTeamMember(companyId: string, formData: FormData) {
   const email = formData.get("email") as string;
+  const role = formData.get("role") as string;
 
-  if (!email) {
-    throw new Error("E-posta adresi zorunludur.");
+  if (!email || !role) {
+    throw new Error("E-posta adresi ve rol zorunludur.");
   }
 
   const trimmedEmail = email.trim().toLowerCase();
@@ -35,7 +36,17 @@ export async function addTeamMember(companyId: string, formData: FormData) {
   await db.insert(companyUsers).values({
     companyId,
     email: trimmedEmail,
+    role: role,
   });
+
+  revalidatePath("/dashboard/team");
+}
+
+export async function updateUserRole(userId: string, newRole: string) {
+  await db
+    .update(companyUsers)
+    .set({ role: newRole })
+    .where(eq(companyUsers.id, userId));
 
   revalidatePath("/dashboard/team");
 }

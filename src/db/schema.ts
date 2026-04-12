@@ -21,6 +21,7 @@ export const products = sqliteTable("products", {
   sku: text("sku"),
   currentStock: integer("current_stock").notNull().default(0),
   price: real("price").notNull().default(0),
+  criticalThreshold: integer("critical_threshold").notNull().default(10),
 });
 
 export const stockMovements = sqliteTable("stock_movements", {
@@ -44,6 +45,7 @@ export const companyUsers = sqliteTable("company_users", {
     .$defaultFn(() => crypto.randomUUID()),
   companyId: text("company_id").notNull(),
   email: text("email").notNull(),
+  role: text("role").notNull().default("Personel"),
   createdAt: text("created_at")
     .notNull()
     .default(sql`(datetime('now'))`),

@@ -12,6 +12,7 @@ export async function addProduct(companyId: string, formData: FormData) {
   const sku = formData.get("sku") as string;
   const currentStock = parseInt(formData.get("current_stock") as string) || 0;
   const price = parseFloat(formData.get("price") as string) || 0;
+  const criticalThreshold = parseInt(formData.get("critical_threshold") as string) || 10;
 
   if (!name) {
     throw new Error("Ürün adı zorunludur.");
@@ -23,6 +24,7 @@ export async function addProduct(companyId: string, formData: FormData) {
     sku: sku?.trim() || null,
     currentStock,
     price,
+    criticalThreshold,
   });
 
   revalidatePath("/dashboard");
@@ -68,6 +70,7 @@ export async function updateStock(
       .select({
         name: products.name,
         currentStock: products.currentStock,
+        criticalThreshold: products.criticalThreshold,
         adminEmail: companies.adminEmail,
       })
       .from(products)
@@ -76,7 +79,7 @@ export async function updateStock(
       .limit(1)
       .then((r: any[]) => r[0] ?? null);
 
-    if (updatedProduct && updatedProduct.currentStock <= 10) {
+    if (updatedProduct && updatedProduct.currentStock <= updatedProduct.criticalThreshold) {
       try {
         await sendMail({
           to: updatedProduct.adminEmail,
@@ -84,7 +87,8 @@ export async function updateStock(
           html: `
             <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
               <h2 style="color: #e11d48;">Kritik Stok Uyarısı!</h2>
-              <p>Dikkat! <strong>${updatedProduct.name}</strong> isimli ürününüzün stoğu kritik seviyeye ( <strong>${updatedProduct.currentStock}</strong> adet ) düşmüştür.</p>
+              <p>Dikkat! <strong>${updatedProduct.name}</strong> isimli ürününüzün stoğu kritik seviyeye ( <strong>${updatedProduct.currentStock}</strong> ${updatedProduct.currentStock === updatedProduct.criticalThreshold ? 'altına' : 'seviyesine'} düşmüştür.</p>
+              <p>Belirlediğiniz kritik eşik: <strong>${updatedProduct.criticalThreshold}</strong> adet.</p>
               <p>Lütfen tedarik planlamanızı yapınız.</p>
               <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
               <p style="font-size: 12px; color: #666;">Bu otomatik bir bilgilendirme mesajıdır.</p>
