@@ -49,6 +49,18 @@ export default function Home() {
 
       {/* Hero Section */}
       <main className="relative z-10 max-w-7xl mx-auto px-6 pt-12 pb-20 md:pt-20 md:pb-32 flex flex-col items-center text-center">
+        <a 
+          href="https://novexistech.com/" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="group mb-6 flex items-center gap-2 px-4 py-1.5 bg-violet-600/10 hover:bg-violet-600/20 border border-violet-500/20 rounded-full transition-all hover:scale-105 active:scale-95"
+        >
+          <span className="text-xs font-bold text-violet-400">Teklif Almak İçin Tıklayın</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-violet-500 group-hover:translate-x-0.5 transition-transform">
+            <polyline points="9 18 15 12 9 6" />
+          </svg>
+        </a>
+
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900/50 border border-slate-800 text-[10px] md:text-xs font-medium text-slate-400 mb-8 backdrop-blur-sm">
           <span className="w-1.5 h-1.5 rounded-full bg-violet-500 animate-pulse" />
           {t("badge")}
@@ -104,8 +116,13 @@ export default function Home() {
           <div className="absolute -top-10 -left-10 w-72 h-72 bg-violet-600/30 blur-[120px] rounded-full pointer-events-none group-hover:bg-violet-600/40 transition-colors duration-700" />
           <div className="absolute -bottom-10 -right-10 w-72 h-72 bg-emerald-600/20 blur-[120px] rounded-full pointer-events-none group-hover:bg-emerald-600/30 transition-colors duration-700" />
 
-          {/* Premium Browser Frame */}
-          <div className="relative bg-slate-900/40 border border-slate-800 rounded-[2.5rem] p-3 shadow-2xl shadow-black/80 backdrop-blur-md overflow-hidden transform transition-all duration-700 hover:scale-[1.01] hover:shadow-violet-500/10 active:scale-[0.995]">
+          {/* Premium Browser Frame - Clickable */}
+          <a 
+            href="https://novexistech.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block relative bg-slate-900/40 border border-slate-800 rounded-[2.5rem] p-3 shadow-2xl shadow-black/80 backdrop-blur-md overflow-hidden transform transition-all duration-700 hover:scale-[1.01] hover:shadow-violet-500/10 active:scale-[0.995]"
+          >
             <div className="bg-slate-950/90 rounded-[1.8rem] overflow-hidden border border-slate-800/80 flex flex-col aspect-[16/10] sm:aspect-video relative group/browser">
               
               {/* Browser Header */}
@@ -127,15 +144,15 @@ export default function Home() {
                 <div className="w-16" /> {/* Spacer */}
               </div>
 
-              {/* Website Content (Screenshot) */}
+              {/* Website Content (Live Animated Preview) */}
               <div className="flex-1 bg-slate-950 relative overflow-hidden group-hover/browser:cursor-pointer">
                 <div className="absolute inset-0 bg-gradient-to-tr from-violet-600/5 to-transparent pointer-events-none z-10" />
                 
-                {/* Image Wrapper with Parallax Hover Effect */}
+                {/* Animated Image Wrapper */}
                 <div className="w-full h-full relative transition-transform duration-1000 group-hover/browser:scale-105">
                   <img 
-                    src="/images/novexistech.png" 
-                    alt="Novexis Tech Showcase" 
+                    src="/videos/preview.webp" 
+                    alt="Novexis Tech Live Showcase" 
                     className="w-full h-full object-cover object-top opacity-90 group-hover/browser:opacity-100 transition-opacity duration-700"
                   />
                 </div>
@@ -156,7 +173,7 @@ export default function Home() {
 
             {/* Subtle Gradient Border Glow */}
             <div className="absolute -inset-1 bg-gradient-to-r from-violet-500/20 to-emerald-500/20 rounded-[2.6rem] blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 -z-10" />
-          </div>
+          </a>
 
           {/* Decorative Floating Elements */}
           <div className="absolute -right-6 top-1/4 w-32 h-32 bg-indigo-500/20 border border-white/5 backdrop-blur-2xl rounded-3xl -rotate-12 -z-10 animate-pulse" />
