@@ -11,6 +11,7 @@ export async function updateCompanySettings(
   settings: {
     locationSystemEnabled?: boolean;
     locationFormat?: string;
+    bomSystemEnabled?: boolean;
   }
 ) {
   const user = await currentUser();

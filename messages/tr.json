@@ -81,13 +81,24 @@
     "saveChanges": "Değişiklikleri Kaydet",
     "productUpdated": "Ürün başarıyla güncellendi.",
     "newAttribute": "Yeni Özellik",
-    "editSuccess": "Değişiklikler başarıyla uygulandı."
+    "editSuccess": "Değişiklikler başarıyla uygulandı.",
+    "bomSystem": "Ürün Ağacı (BOM) Sistemi",
+    "activateBOMSystem": "Ürün Ağacı Sistemini Aktif Et",
+    "bomSystemDesc": "Ana ürünlerin bileşenlerden oluştuğu montaj süreçlerini takip etmenizi sağlar.",
+    "anaSku": "Ana Ürün SKU",
+    "bilesenSku": "Bileşen SKU",
+    "quantity": "Miktar",
+    "bomImportSuccess": "Ürün ağaçları başarıyla aktarıldı.",
+    "components": "Bileşenler",
+    "productTree": "Ürün Ağacı",
+    "assemblyOut": "Montaj Çıkışı Yap"
   },
   "Navigation": {
     "products": "Ürünler",
     "history": "Stok Geçmişi",
     "team": "Ekibim",
-    "settings": "Ayarlar"
+    "settings": "Ayarlar",
+    "bom": "Ürün Ağacı"
   },
   "Admin": {
     "title": "Firma Yönetimi",

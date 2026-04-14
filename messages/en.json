@@ -81,13 +81,24 @@
     "saveChanges": "Save Changes",
     "productUpdated": "Product updated successfully.",
     "newAttribute": "New Attribute",
-    "editSuccess": "Changes applied successfully."
+    "editSuccess": "Changes applied successfully.",
+    "bomSystem": "Bill of Materials (BOM) System",
+    "activateBOMSystem": "Activate BOM System",
+    "bomSystemDesc": "Allows you to track assembly processes where main products consist of components.",
+    "anaSku": "Parent SKU",
+    "bilesenSku": "Component SKU",
+    "quantity": "Quantity",
+    "bomImportSuccess": "BOMs imported successfully.",
+    "components": "Components",
+    "productTree": "Product Tree",
+    "assemblyOut": "Perform Assembly Out"
   },
   "Navigation": {
     "products": "Products",
     "history": "Stock History",
     "team": "My Team",
-    "settings": "Settings"
+    "settings": "Settings",
+    "bom": "Product Tree"
   },
   "Admin": {
     "title": "Company Management",

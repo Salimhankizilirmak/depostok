@@ -84,13 +84,24 @@
     "saveChanges": "保存更改",
     "productUpdated": "产品更新成功。",
     "newAttribute": "新属性",
-    "editSuccess": "更改已成功应用。"
+    "editSuccess": "更改已成功应用。",
+    "bomSystem": "物料清单 (BOM) 系统",
+    "activateBOMSystem": "启用 BOM 系统",
+    "bomSystemDesc": "允许您跟踪由组件组成的主产品的组装过程。",
+    "anaSku": "主 SKU",
+    "bilesenSku": "组件 SKU",
+    "quantity": "数量",
+    "bomImportSuccess": "BOM 已成功导入。",
+    "components": "组件",
+    "productTree": "产品树",
+    "assemblyOut": "执行组装出库"
   },
   "Navigation": {
     "products": "产品",
     "history": "库存历史",
     "team": "我的团队",
-    "settings": "设置"
+    "settings": "设置",
+    "bom": "产品树"
   },
   "Admin": {
     "title": "公司管理",

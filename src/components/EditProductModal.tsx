@@ -25,11 +25,11 @@ export default function EditProductModal({ product, companyId, locationSystemEna
     
     const data = {
       name: formData.get("name") as string,
-      sku: formData.get("sku") as string,
+      sku: (formData.get("sku") as string) || null,
       price: parseFloat(formData.get("price") as string) || 0,
       criticalThreshold: parseInt(formData.get("critical_threshold") as string) || 10,
-      location: formData.get("location") as string || null,
-      attributes: formData.get("attributes") as string || null,
+      location: (formData.get("location") as string) || null,
+      attributes: (formData.get("attributes") as string) || null,
     };
 
     startTransition(async () => {

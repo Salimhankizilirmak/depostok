@@ -85,13 +85,24 @@
     "saveChanges": "حفظ التغييرات",
     "productUpdated": "تم تحديث المنتج بنجاح.",
     "newAttribute": "صفة جديدة",
-    "editSuccess": "تم تطبيق التغييرات بنجاح."
+    "editSuccess": "تم تطبيق التغييرات بنجاح.",
+    "bomSystem": "نظام قائمة المواد (BOM)",
+    "activateBOMSystem": "تفعيل نظام قائمة المواد",
+    "bomSystemDesc": "يسمح لك بتتبع عمليات التجميع حيث تتكون المنتجات الرئيسية من مكونات.",
+    "anaSku": "الرمز الرئيسي (SKU)",
+    "bilesenSku": "رمز المكون (SKU)",
+    "quantity": "الكمية",
+    "bomImportSuccess": "تم استيراد قائمة المواد بنجاح.",
+    "components": "المكونات",
+    "productTree": "شجرة المنتج",
+    "assemblyOut": "تنفيذ إخراج تجميع"
   },
   "Navigation": {
     "products": "المنتجات",
     "history": "سجل المخزون",
     "team": "فريقي",
-    "settings": "الإعدادات"
+    "settings": "الإعدادات",
+    "bom": "شجرة المنتج"
   },
   "Admin": {
     "title": "إدارة الشركات",

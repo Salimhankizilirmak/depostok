@@ -12,6 +12,17 @@ export const companies = sqliteTable("companies", {
     .default(sql`(datetime('now'))`),
   locationSystemEnabled: integer("location_system_enabled", { mode: "boolean" }).notNull().default(false),
   locationFormat: text("location_format").notNull().default("free"),
+  bomSystemEnabled: integer("bom_system_enabled", { mode: "boolean" }).notNull().default(false),
+});
+
+export const productTrees = sqliteTable("product_trees", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  parentProductId: text("parent_product_id").notNull(),
+  childProductId: text("child_product_id").notNull(),
+  quantity: real("quantity").notNull(),
+  companyId: text("company_id").notNull(),
 });
 
 export const products = sqliteTable("products", {

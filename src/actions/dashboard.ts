@@ -2,8 +2,8 @@
 import { currentUser } from "@clerk/nextjs/server";
 
 import { db } from "@/db";
-import { products, stockMovements, companies } from "@/db/schema";
-import { eq, sql } from "drizzle-orm";
+import { products, stockMovements, companies, productTrees } from "@/db/schema";
+import { eq, sql, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { sendMail } from "@/lib/mail";
 
@@ -58,6 +58,37 @@ export async function updateStock(
   });
 
   // 2) Ürün stok miktarını güncelle
+  const [firma] = await db.select().from(companies).where(eq(companies.id, companyId)).limit(1);
+
+  if (type === "out" && firma?.bomSystemEnabled) {
+    const components = await db.select().from(productTrees).where(eq(productTrees.parentProductId, productId));
+    if (components.length > 0) {
+      for (const comp of components) {
+        const deduction = quantity * comp.quantity;
+        
+        // Bileşen stok düşüşü
+        await db.update(products)
+          .set({ currentStock: sql`${products.currentStock} - ${deduction}` })
+          .where(eq(products.id, comp.childProductId));
+
+        // Bileşen hareketi kaydet
+        await db.insert(stockMovements).values({
+          productId: comp.childProductId,
+          companyId,
+          type: "out",
+          quantity: deduction,
+          description: `BOM Montaj Çıkışı (${description})`,
+          userEmail,
+        });
+
+        // Bileşen için kritik stok kontrolü (Opsiyonel ama iyi olur)
+        await checkAndNotifyCriticalStock(comp.childProductId, companyId);
+      }
+      revalidatePath("/dashboard");
+      return; // Ana üründen düşme
+    }
+  }
+
   await db
     .update(products)
     .set({
@@ -68,41 +99,9 @@ export async function updateStock(
     })
     .where(eq(products.id, productId));
 
-  // 3) Kritik stok kontrolü (Refetch updated stock and company admin info)
+  // 3) Kritik stok kontrolü
   if (type === "out") {
-    const [updatedProduct] = await db
-      .select({
-        name: products.name,
-        currentStock: products.currentStock,
-        criticalThreshold: products.criticalThreshold,
-        adminEmail: companies.adminEmail,
-      })
-      .from(products)
-      .innerJoin(companies, eq(products.companyId, companies.id))
-      .where(eq(products.id, productId))
-      .limit(1);
-
-    if (updatedProduct && updatedProduct.currentStock <= updatedProduct.criticalThreshold) {
-      try {
-        await sendMail({
-          to: updatedProduct.adminEmail,
-          subject: "⚠️ KRİTİK STOK UYARISI!",
-          html: `
-            <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-              <h2 style="color: #e11d48;">Kritik Stok Uyarısı!</h2>
-              <p>Dikkat! <strong>${updatedProduct.name}</strong> isimli ürününüzün stoğu kritik seviyeye ( <strong>${updatedProduct.currentStock}</strong> ${updatedProduct.currentStock === updatedProduct.criticalThreshold ? 'altına' : 'seviyesine'} düşmüştür.</p>
-              <p>Belirlediğiniz kritik eşik: <strong>${updatedProduct.criticalThreshold}</strong> adet.</p>
-              <p>Lütfen tedarik planlamanızı yapınız.</p>
-              <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
-              <p style="font-size: 12px; color: #666;">Bu otomatik bir bilgilendirme mesajıdır.</p>
-            </div>
-          `,
-        });
-        console.log(`Alert sent to ${updatedProduct.adminEmail} for ${updatedProduct.name}`);
-      } catch (error) {
-        console.error("Email sending failed:", error);
-      }
-    }
+    await checkAndNotifyCriticalStock(productId, companyId);
   }
 
   revalidatePath("/dashboard");
@@ -175,11 +174,11 @@ export async function undoImportProducts(batchId: string, companyId: string) {
 
 export async function updateProduct(productId: string, companyId: string, data: {
   name?: string;
-  sku?: string;
+  sku?: string | null;
   price?: number;
   criticalThreshold?: number;
-  location?: string;
-  attributes?: string;
+  location?: string | null;
+  attributes?: string | null;
 }) {
   const user = await currentUser();
   const email = user?.emailAddresses?.[0]?.emailAddress;
@@ -197,4 +196,39 @@ export async function updateProduct(productId: string, companyId: string, data: 
   }).where(and(eq(products.id, productId), eq(products.companyId, companyId)));
 
   revalidatePath("/dashboard");
+}
+
+async function checkAndNotifyCriticalStock(productId: string, companyId: string) {
+  const [updatedProduct] = await db
+    .select({
+      name: products.name,
+      currentStock: products.currentStock,
+      criticalThreshold: products.criticalThreshold,
+      adminEmail: companies.adminEmail,
+    })
+    .from(products)
+    .innerJoin(companies, eq(products.companyId, companies.id))
+    .where(eq(products.id, productId))
+    .limit(1);
+
+  if (updatedProduct && updatedProduct.currentStock <= updatedProduct.criticalThreshold) {
+    try {
+      await sendMail({
+        to: updatedProduct.adminEmail,
+        subject: "⚠️ KRİTİK STOK UYARISI!",
+        html: `
+          <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+            <h2 style="color: #e11d48;">Kritik Stok Uyarısı!</h2>
+            <p>Dikkat! <strong>${updatedProduct.name}</strong> isimli ürününüzün stoğu kritik seviyeye ( <strong>${updatedProduct.currentStock}</strong> ${updatedProduct.currentStock === updatedProduct.criticalThreshold ? 'altına' : 'seviyesine'} düşmüştür.</p>
+            <p>Belirlediğiniz kritik eşik: <strong>${updatedProduct.criticalThreshold}</strong> adet.</p>
+            <p>Lütfen tedarik planlamanızı yapınız.</p>
+            <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
+            <p style="font-size: 12px; color: #666;">Bu otomatik bir bilgilendirme mesajıdır.</p>
+          </div>
+        `,
+      });
+    } catch (error) {
+      console.error("Kritik stok maili gönderilemedi:", error);
+    }
+  }
 }

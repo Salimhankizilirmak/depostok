@@ -15,13 +15,14 @@ export default function DashboardNav({ userRole }: DashboardNavProps) {
   const links = [
     { href: "/dashboard", label: t("products") },
     { href: "/dashboard/history", label: t("history") },
-    { href: "/dashboard/team", label: t("team") },
-    { href: "/dashboard/settings", label: t("settings") },
+    { name: t("team"), href: "/dashboard/team", roles: ["Yönetici", "Super Admin"] },
+    { name: t("bom"), href: "/dashboard/bom", roles: ["Yönetici", "Super Admin", "Satın Alma", "Mühendis"] },
+    { name: t("settings"), href: "/dashboard/settings", roles: ["Yönetici", "Super Admin"] },
   ];
 
   const filteredLinks = links.filter((link) => {
-    if (link.href === "/dashboard/team" || link.href === "/dashboard/settings") {
-      return userRole === "Yönetici";
+    if (link.roles) {
+      return userRole && link.roles.includes(userRole);
     }
     return true;
   });
