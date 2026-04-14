@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { integer, real, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
 
 export const companies = sqliteTable("companies", {
   id: text("id")
@@ -10,6 +10,8 @@ export const companies = sqliteTable("companies", {
   createdAt: text("created_at")
     .notNull()
     .default(sql`(datetime('now'))`),
+  locationSystemEnabled: integer("location_system_enabled", { mode: "boolean" }).notNull().default(false),
+  locationFormat: text("location_format").notNull().default("free"),
 });
 
 export const products = sqliteTable("products", {
@@ -22,7 +24,11 @@ export const products = sqliteTable("products", {
   currentStock: integer("current_stock").notNull().default(0),
   price: real("price").notNull().default(0),
   criticalThreshold: integer("critical_threshold").notNull().default(10),
-});
+  location: text("location"),
+  attributes: text("attributes"),
+}, (table) => ({
+  companySkuIndex: uniqueIndex("company_sku_idx").on(table.companyId, table.sku),
+}));
 
 export const stockMovements = sqliteTable("stock_movements", {
   id: text("id")

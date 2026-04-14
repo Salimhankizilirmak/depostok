@@ -5,13 +5,28 @@ import { eq, and, gt, desc, sql } from "drizzle-orm";
 import { addProduct } from "@/actions/dashboard";
 import StockButtons from "@/components/StockButtons";
 import ExportExcelButton from "@/components/ExportExcelButton";
+import ImportExcelButton from "@/components/ImportExcelButton";
+import AttributesInput from "@/components/AttributesInput";
 import { redirect } from "next/navigation";
 import { getCompanyAndRole } from "@/lib/auth-repair";
 import { getTranslations } from "next-intl/server";
+import { like, lte, count } from "drizzle-orm";
+import DashboardSearch from "@/components/DashboardSearch";
+import DeleteProductButton from "@/components/DeleteProductButton";
+import Pagination from "@/components/Pagination";
 
 export const dynamic = "force-dynamic";
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
+  const { q, f, p } = await searchParams;
+  const searchTerm = typeof q === "string" ? q : "";
+  const filter = typeof f === "string" ? f : "all";
+  const currentPage = typeof p === "string" ? parseInt(p) : 1;
+  const pageSize = 50;
   const user = await currentUser();
   const email = user?.emailAddresses?.[0]?.emailAddress ?? null;
 
@@ -25,10 +40,34 @@ export default async function DashboardPage() {
   // RBAC yetkileri
   const canSeePrices = firma.userRole === "Yönetici" || firma.userRole === "Yetkili";
 
+  // Sorgu Koşulları
+  const conditions = [eq(products.companyId, firma.id)];
+  
+  if (searchTerm) {
+    conditions.push(like(products.name, `%${searchTerm}%`));
+  }
+  
+  if (filter === "critical") {
+    conditions.push(lte(products.currentStock, products.criticalThreshold));
+  }
+
+  const whereClause = and(...conditions);
+
+  // Toplam sayı (Pagination için)
+  const totalCountResult = await db
+    .select({ total: count() })
+    .from(products)
+    .where(whereClause);
+  const totalItems = totalCountResult[0]?.total ?? 0;
+  const totalPages = Math.ceil(totalItems / pageSize);
+
   const urunler = await db
     .select()
     .from(products)
-    .where(eq(products.companyId, firma.id));
+    .where(whereClause)
+    .limit(pageSize)
+    .offset((currentPage - 1) * pageSize)
+    .orderBy(desc(products.id)); // En son eklenenler önce? Ya da ID bazlı
 
   // Server Action binder
   const addProductWithId = addProduct.bind(null, firma.id);
@@ -170,6 +209,12 @@ export default async function DashboardPage() {
           </div>
           <h2 className="text-white font-semibold text-sm">{t("addProduct")}</h2>
         </div>
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-6">
+          <p className="text-slate-400 text-xs">
+            {t("addProductDesc") || "Hızlıca yeni bir ürün ekleyebilir veya Excel listesi yükleyebilirsiniz."}
+          </p>
+          <ImportExcelButton companyId={firma.id} />
+        </div>
 
         <form action={addProductWithId}>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -195,14 +240,31 @@ export default async function DashboardPage() {
               <label htmlFor="product-threshold" className="block text-xs font-medium text-slate-400 mb-1.5">{t("criticalLevel")}</label>
               <input id="product-threshold" name="critical_threshold" type="number" min="0" defaultValue="10" className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all" />
             </div>
+            {firma.locationSystemEnabled && (
+              <div>
+                <label htmlFor="product-location" className="block text-xs font-medium text-slate-400 mb-1.5">{t("shelfLocation")}</label>
+                <input 
+                  id="product-location" 
+                  name="location" 
+                  type="text" 
+                  placeholder={firma.locationFormat === "hierarchical" ? "K-R-S" : "..."} 
+                  className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all" 
+                />
+              </div>
+            )}
           </div>
-          <div className="mt-4 flex justify-end">
+
+          <AttributesInput />
+
+          <div className="mt-8 flex justify-end">
             <button type="submit" className="w-full sm:w-auto bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold text-sm rounded-xl px-6 py-2.5 transition-all duration-200 shadow-lg shadow-emerald-500/25 active:scale-[0.98]">
               {t("saveProduct")}
             </button>
           </div>
         </form>
       </div>
+
+      <DashboardSearch />
 
       {/* ─── Ürün Tablosu ─── */}
       <div className="bg-slate-900 border border-slate-800 rounded-2xl shadow-xl shadow-black/30 overflow-hidden">
@@ -216,6 +278,7 @@ export default async function DashboardPage() {
               [t("productName")]: u.name,
               [t("sku")]: u.sku || "—",
               "Mevcut Stok": u.currentStock,
+              ...(firma.locationSystemEnabled ? { [t("shelfLocation")]: u.location || "—" } : {}),
             }))}
             fileName={`${firma.name}_Stok_Raporu`}
           />
@@ -236,6 +299,9 @@ export default async function DashboardPage() {
                     </>
                   )}
                   <th className="text-right text-xs font-semibold text-slate-500 uppercase tracking-wider px-6 py-3">{t("statusLabel")}</th>
+                  {firma.locationSystemEnabled && (
+                    <th className="text-right text-xs font-semibold text-slate-500 uppercase tracking-wider px-6 py-3">{t("shelfLocation")}</th>
+                  )}
                   <th className="text-right text-xs font-semibold text-slate-500 uppercase tracking-wider px-6 py-3">{t("actions")}</th>
                 </tr>
               </thead>
@@ -255,7 +321,18 @@ export default async function DashboardPage() {
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-slate-700 to-slate-600 flex items-center justify-center flex-shrink-0 text-white font-bold text-xs uppercase">{urun.name.charAt(0)}</div>
-                          <span className="text-white font-semibold text-sm">{urun.name}</span>
+                          <div>
+                            <div className="text-sm font-medium text-white">{urun.name}</div>
+                            {urun.attributes && (
+                              <div className="flex flex-wrap gap-1 mt-1">
+                                {Object.entries(JSON.parse(urun.attributes as string)).map(([k, v]) => (
+                                  <span key={k} className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-800 text-slate-400 border border-slate-700">
+                                    {k}: {v as string}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </td>
                       <td className="px-6 py-4">
@@ -275,7 +352,21 @@ export default async function DashboardPage() {
                           <span className="w-1.5 h-1.5 rounded-full bg-current" />{stokDurum.label}
                         </span>
                       </td>
-                      <td className="px-6 py-4"><StockButtons productId={urun.id} companyId={firma.id} productName={urun.name} /></td>
+                      {firma.locationSystemEnabled && (
+                        <td className="px-6 py-4 text-right">
+                          <span className="font-mono text-xs text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 rounded-md px-2.5 py-1.5">
+                            {urun.location || "—"}
+                          </span>
+                        </td>
+                      )}
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-2">
+                          <StockButtons productId={urun.id} companyId={firma.id} productName={urun.name} />
+                          {firma.userRole === "Yönetici" && (
+                            <DeleteProductButton productId={urun.id} companyId={firma.id} />
+                          )}
+                        </div>
+                      </td>
                     </tr>
                   );
                 })}
@@ -283,6 +374,8 @@ export default async function DashboardPage() {
             </table>
           </div>
         )}
+        
+        <Pagination currentPage={currentPage} totalPages={totalPages} />
       </div>
     </div>
   );

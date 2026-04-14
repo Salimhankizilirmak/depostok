@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
+import { Toaster } from "sonner";
 import "../globals.css";
 
 const geistSans = Geist({
@@ -45,6 +46,7 @@ export default async function RootLayout({
         <NextIntlClientProvider messages={messages}>
           <body className="min-h-full flex flex-col bg-slate-950">
             {children}
+            <Toaster position="top-center" richColors />
           </body>
         </NextIntlClientProvider>
       </html>

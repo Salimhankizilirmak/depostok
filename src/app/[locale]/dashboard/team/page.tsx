@@ -5,6 +5,7 @@ import { companyUsers } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { getCompanyAndRole } from "@/lib/auth-repair";
 import TeamManagement from "@/components/TeamManagement";
+import WarehouseSettings from "@/components/WarehouseSettings";
 import { addTeamMember, updateUserRole } from "@/actions/team";
 
 export const dynamic = "force-dynamic";
@@ -58,6 +59,12 @@ export default async function TeamPage() {
         currentUserEmail={email}
         addMemberAction={addTeamMember}
         updateRoleAction={handleUpdateRole}
+      />
+
+      <WarehouseSettings
+        companyId={firma.id}
+        initialEnabled={firma.locationSystemEnabled}
+        initialFormat={firma.locationFormat}
       />
     </div>
   );

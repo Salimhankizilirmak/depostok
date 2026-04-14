@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db";
-import { companyUsers } from "@/db/schema";
+import { companyUsers, companies } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
@@ -49,4 +49,21 @@ export async function updateUserRole(userId: string, newRole: string) {
     .where(eq(companyUsers.id, userId));
 
   revalidatePath("/dashboard/team");
+}
+
+export async function updateCompanyWarehouseSettings(
+  companyId: string,
+  locationSystemEnabled: boolean,
+  locationFormat: string
+) {
+  await db
+    .update(companies)
+    .set({
+      locationSystemEnabled,
+      locationFormat,
+    })
+    .where(eq(companies.id, companyId));
+
+  revalidatePath("/dashboard/team");
+  revalidatePath("/dashboard");
 }

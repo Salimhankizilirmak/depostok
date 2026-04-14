@@ -7,7 +7,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
   let locale = await requestLocale;
 
   console.log(`[i18n] Loading messages for locale: ${locale}`);
-  
+
   // Geçerli bir locale değilse varsayılana dön veya 404 ver
   if (!locale || !(routing.locales as readonly string[]).includes(locale as string)) {
     console.warn(`[i18n] Invalid or missing locale: ${locale}. Fallback to default: ${routing.defaultLocale}`);

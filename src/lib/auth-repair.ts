@@ -15,6 +15,8 @@ export async function getCompanyAndRole(email: string) {
       id: companies.id,
       name: companies.name,
       adminEmail: companies.adminEmail,
+      locationSystemEnabled: companies.locationSystemEnabled,
+      locationFormat: companies.locationFormat,
       userRole: companyUsers.role,
       userId: companyUsers.id,
     })
@@ -29,6 +31,8 @@ export async function getCompanyAndRole(email: string) {
       id: existing.id,
       name: existing.name,
       adminEmail: existing.adminEmail,
+      locationSystemEnabled: existing.locationSystemEnabled,
+      locationFormat: existing.locationFormat,
       userRole: existing.userRole as string,
       userId: existing.userId,
     };
@@ -55,6 +59,8 @@ export async function getCompanyAndRole(email: string) {
       id: companyAdmin.id,
       name: companyAdmin.name,
       adminEmail: companyAdmin.adminEmail,
+      locationSystemEnabled: companyAdmin.locationSystemEnabled,
+      locationFormat: companyAdmin.locationFormat,
       userRole: "Yönetici",
       userId: newMember.id,
     };
