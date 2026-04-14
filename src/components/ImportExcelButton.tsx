@@ -113,7 +113,7 @@ export default function ImportExcelButton({ companyId }: ImportExcelButtonProps)
       try {
         const result = await importProducts(companyId, importedProducts);
         
-        if (result?.success) {
+        if (result?.success && result.batchId) {
           toast.success(t("importSuccessWithUndo", { count: importedProducts.length }), {
             duration: 10000,
             action: {
