@@ -263,7 +263,7 @@ export default async function DashboardPage({
 
       {/* ─── Ürün Tablosu ─── */}
       <div className="bg-slate-900 border border-slate-800 rounded-2xl shadow-xl shadow-black/30 overflow-hidden">
-        <div className="px-6 py-4 border-b border-slate-800 flex items-center justify-between gap-4">
+        <div className="px-6 py-4 border-b border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 w-full">
           <div className="flex items-center gap-2">
             <h2 className="text-white font-semibold text-sm">{t("productList")}</h2>
             <span className="text-xs text-slate-500">{t("productCount", { count: urunler.length })}</span>
@@ -280,24 +280,24 @@ export default async function DashboardPage({
         </div>
 
         {urunler.length > 0 && (
-          <div className="overflow-x-auto">
-            <table className="w-full">
+          <div className="w-full overflow-x-auto">
+            <table className="w-full min-w-[800px]">
               <thead>
                 <tr className="border-b border-slate-800">
-                  <th className="text-left text-xs font-semibold text-slate-500 uppercase tracking-wider px-6 py-3">{t("productName")}</th>
-                  <th className="text-left text-xs font-semibold text-slate-500 uppercase tracking-wider px-6 py-3">{t("sku")}</th>
-                  <th className="text-right text-xs font-semibold text-slate-500 uppercase tracking-wider px-6 py-3">{t("productStatus")}</th>
+                  <th className="text-left text-xs font-semibold text-slate-500 uppercase tracking-wider px-6 py-3 whitespace-nowrap">{t("productName")}</th>
+                  <th className="text-left text-xs font-semibold text-slate-500 uppercase tracking-wider px-6 py-3 whitespace-nowrap">{t("sku")}</th>
+                  <th className="text-right text-xs font-semibold text-slate-500 uppercase tracking-wider px-6 py-3 whitespace-nowrap">{t("productStatus")}</th>
                   {canSeePrices && (
                     <>
-                      <th className="text-right text-xs font-semibold text-slate-500 uppercase tracking-wider px-6 py-3">{t("unitPrice")}</th>
-                      <th className="text-right text-xs font-semibold text-slate-500 uppercase tracking-wider px-6 py-3">{t("totalValue")}</th>
+                      <th className="text-right text-xs font-semibold text-slate-500 uppercase tracking-wider px-6 py-3 whitespace-nowrap">{t("unitPrice")}</th>
+                      <th className="text-right text-xs font-semibold text-slate-500 uppercase tracking-wider px-6 py-3 whitespace-nowrap">{t("totalValue")}</th>
                     </>
                   )}
-                  <th className="text-right text-xs font-semibold text-slate-500 uppercase tracking-wider px-6 py-3">{t("statusLabel")}</th>
+                  <th className="text-right text-xs font-semibold text-slate-500 uppercase tracking-wider px-6 py-3 whitespace-nowrap">{t("statusLabel")}</th>
                   {firma.locationSystemEnabled && (
-                    <th className="text-right text-xs font-semibold text-slate-500 uppercase tracking-wider px-6 py-3">{t("shelfLocation")}</th>
+                    <th className="text-right text-xs font-semibold text-slate-500 uppercase tracking-wider px-6 py-3 whitespace-nowrap">{t("shelfLocation")}</th>
                   )}
-                  <th className="text-right text-xs font-semibold text-slate-500 uppercase tracking-wider px-6 py-3">{t("actions")}</th>
+                  <th className="text-right text-xs font-semibold text-slate-500 uppercase tracking-wider px-6 py-3 whitespace-nowrap">{t("actions")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/60">

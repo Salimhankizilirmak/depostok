@@ -46,7 +46,7 @@ export default function DashboardSearch() {
   };
 
   return (
-    <div className="flex flex-col md:flex-row items-center gap-4 mb-8">
+    <div className="flex flex-col md:flex-row items-center justify-between w-full gap-4 mb-8">
       {/* Search Input */}
       <div className="relative flex-1 w-full">
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
@@ -69,10 +69,10 @@ export default function DashboardSearch() {
       </div>
 
       {/* Filter Buttons */}
-      <div className="flex items-center gap-2 bg-slate-900 p-1.5 rounded-2xl border border-slate-800 shadow-lg shadow-black/20">
+      <div className="flex flex-col sm:flex-row w-full sm:w-auto items-center gap-2 bg-slate-900 p-1.5 rounded-2xl border border-slate-800 shadow-lg shadow-black/20">
         <button
           onClick={() => handleFilter("all")}
-          className={`px-4 py-2 text-xs font-semibold rounded-xl transition-all ${
+          className={`w-full sm:w-auto px-4 py-2 text-xs font-semibold rounded-xl transition-all ${
             currentFilter === "all"
               ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/25"
               : "text-slate-400 hover:text-white hover:bg-white/5"
@@ -82,7 +82,7 @@ export default function DashboardSearch() {
         </button>
         <button
           onClick={() => handleFilter("critical")}
-          className={`px-4 py-2 text-xs font-semibold rounded-xl transition-all flex items-center gap-2 ${
+          className={`w-full sm:w-auto px-4 py-2 text-xs font-semibold rounded-xl transition-all flex items-center justify-center gap-2 ${
             currentFilter === "critical"
               ? "bg-red-600 text-white shadow-lg shadow-red-600/25"
               : "text-slate-400 hover:text-white hover:bg-white/5"

@@ -81,7 +81,7 @@ export default async function HistoryPage() {
 
       {/* Tablo */}
       <div className="bg-slate-900 border border-slate-800 rounded-2xl shadow-xl shadow-black/30 overflow-hidden">
-        <div className="px-6 py-4 border-b border-slate-800 flex items-center justify-between gap-4">
+        <div className="px-6 py-4 border-b border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 w-full">
           <div className="flex items-center gap-2">
             <h2 className="text-white font-semibold text-sm">Tüm Hareketler</h2>
             <span className="text-xs text-slate-500">
@@ -126,27 +126,27 @@ export default async function HistoryPage() {
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <div className="min-w-[700px] lg:min-w-0">
-              <table className="w-full">
+          <div className="w-full overflow-x-auto">
+            <div className="min-w-[800px]">
+              <table className="w-full min-w-[800px]">
               <thead>
                 <tr className="border-b border-slate-800">
-                  <th className="text-left text-xs font-semibold text-slate-500 uppercase tracking-wider px-6 py-3">
+                  <th className="text-left text-xs font-semibold text-slate-500 uppercase tracking-wider px-6 py-3 whitespace-nowrap">
                     Tarih
                   </th>
-                  <th className="text-left text-xs font-semibold text-slate-500 uppercase tracking-wider px-6 py-3">
+                  <th className="text-left text-xs font-semibold text-slate-500 uppercase tracking-wider px-6 py-3 whitespace-nowrap">
                     Ürün
                   </th>
-                  <th className="text-center text-xs font-semibold text-slate-500 uppercase tracking-wider px-6 py-3">
+                  <th className="text-center text-xs font-semibold text-slate-500 uppercase tracking-wider px-6 py-3 whitespace-nowrap">
                     İşlem Tipi
                   </th>
-                  <th className="text-left text-xs font-semibold text-slate-500 uppercase tracking-wider px-6 py-3">
+                  <th className="text-left text-xs font-semibold text-slate-500 uppercase tracking-wider px-6 py-3 whitespace-nowrap">
                     Açıklama
                   </th>
-                  <th className="text-left text-xs font-semibold text-slate-500 uppercase tracking-wider px-6 py-3">
+                  <th className="text-left text-xs font-semibold text-slate-500 uppercase tracking-wider px-6 py-3 whitespace-nowrap">
                     İşlemi Yapan
                   </th>
-                  <th className="text-right text-xs font-semibold text-slate-500 uppercase tracking-wider px-6 py-3">
+                  <th className="text-right text-xs font-semibold text-slate-500 uppercase tracking-wider px-6 py-3 whitespace-nowrap">
                     Miktar
                   </th>
                 </tr>
