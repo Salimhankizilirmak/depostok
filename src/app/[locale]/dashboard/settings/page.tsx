@@ -3,7 +3,6 @@ import { getCompanyAndRole } from "@/lib/auth-repair";
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import LocationToggle from "@/components/LocationToggle";
-import BOMToggle from "@/components/BOMToggle";
 
 export default async function SettingsPage() {
   const user = await currentUser();
@@ -45,11 +44,6 @@ export default async function SettingsPage() {
           <LocationToggle 
             companyId={firma.id} 
             initialValue={firma.locationSystemEnabled} 
-          />
-
-          <BOMToggle 
-            companyId={firma.id} 
-            initialEnabled={firma.bomSystemEnabled} 
           />
         </div>
 

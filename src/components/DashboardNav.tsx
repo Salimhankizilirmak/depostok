@@ -15,9 +15,9 @@ export default function DashboardNav({ userRole }: DashboardNavProps) {
   const links = [
     { href: "/dashboard", label: t("products") },
     { href: "/dashboard/history", label: t("history") },
-    { name: t("team"), href: "/dashboard/team", roles: ["Yönetici", "Super Admin"] },
-    { name: t("bom"), href: "/dashboard/bom", roles: ["Yönetici", "Super Admin", "Yetkili", "Mühendis"] },
-    { name: t("settings"), href: "/dashboard/settings", roles: ["Yönetici", "Super Admin"] },
+    { href: "/dashboard/team", label: t("team"), roles: ["Yönetici", "Super Admin"] },
+    { href: "/dashboard/bom", label: t("bom"), roles: ["Yönetici", "Super Admin", "Yetkili", "Mühendis"] },
+    { href: "/dashboard/settings", label: t("settings"), roles: ["Yönetici", "Super Admin"] },
   ];
 
   const filteredLinks = links.filter((link) => {

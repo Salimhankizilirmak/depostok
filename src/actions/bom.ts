@@ -45,8 +45,9 @@ export async function importBOM(companyId: string, bomRows: { parentSku: string;
 
   const { getCompanyAndRole } = await import("@/lib/auth-repair");
   const firma = await getCompanyAndRole(email);
-  if (!firma || firma.id !== companyId || firma.userRole !== "Yönetici") {
-    throw new Error("Bu işlemi yapmaya yetkiniz yok.");
+  const allowedRoles = ["Yönetici", "Super Admin", "Mühendis", "Yetkili"];
+  if (!firma || firma.id !== companyId || !allowedRoles.includes(firma.userRole)) {
+    throw new Error("Yetkisiz işlem.");
   }
 
   // SKU'ları ürün ID'leri ile eşleştir

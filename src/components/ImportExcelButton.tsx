@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, useTransition, useRef } from "react";
+import { useTransition, useRef } from "react";
 import { useTranslations } from "next-intl";
 import * as XLSX from "xlsx";
 import { toast } from "sonner";
 import { importProducts, undoImportProducts } from "@/actions/dashboard";
-import { importBOM } from "@/actions/bom";
 import { useRouter } from "next/navigation";
 
 interface ImportExcelButtonProps {
@@ -15,11 +14,9 @@ interface ImportExcelButtonProps {
 export default function ImportExcelButton({ companyId }: ImportExcelButtonProps) {
   const t = useTranslations("Dashboard");
   const [isPending, startTransition] = useTransition();
-  const [mode, setMode] = useState<"product" | "bom">("product");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
-  // Fuzzy Matching kelime grupları
   const schemaMap = {
     name: ["ad", "isim", "urun", "name", "title", "malzeme"],
     sku: ["sku", "barkod", "kod", "code", "itemno"],
@@ -33,16 +30,11 @@ export default function ImportExcelButton({ companyId }: ImportExcelButtonProps)
 
   const findBestMatch = (header: string) => {
     const clean = normalize(header);
-    
-    // 1. Önce Stok (Miktar) kelimesini ara (Keyword Collision önceliği)
     if (schemaMap.currentStock.some(alias => clean.includes(alias))) return "currentStock";
-    
-    // 2. Diğerlerini tara
     for (const [field, aliases] of Object.entries(schemaMap)) {
       if (field === "currentStock") continue;
       if (aliases.some(alias => clean.includes(alias))) return field;
     }
-    
     return null;
   };
 
@@ -57,30 +49,19 @@ export default function ImportExcelButton({ companyId }: ImportExcelButtonProps)
       const wsname = wb.SheetNames[0];
       const ws = wb.Sheets[wsname];
       const data = XLSX.utils.sheet_to_json(ws);
-
-      if (mode === "product") {
-        processImport(data);
-      } else {
-        processBOMImport(data);
-      }
+      processImport(data);
     };
     reader.readAsBinaryString(file);
-    
-    // Inputu temizle ki aynı dosya tekrar seçilebilsin
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const processImport = (rawData: any[]) => {
     let importedProducts: any[] = [];
-    let skippedCount = 0;
-    let totalRead = rawData.length;
-
     rawData.forEach((row) => {
       const cleanRow: any = {};
       const keys = Object.keys(row);
       const matchedKeys = new Set<string>();
 
-      // Akıllı Eşleştirme
       keys.forEach((key) => {
         const field = findBestMatch(key);
         if (field && !cleanRow[field]) {
@@ -89,7 +70,6 @@ export default function ImportExcelButton({ companyId }: ImportExcelButtonProps)
         }
       });
 
-      // Ek özellikleri (Attributes) topla
       const extraAttributes: Record<string, any> = {};
       keys.forEach((k) => {
         if (!matchedKeys.has(k)) {
@@ -98,23 +78,15 @@ export default function ImportExcelButton({ companyId }: ImportExcelButtonProps)
       });
       cleanRow.attributes = Object.keys(extraAttributes).length > 0 ? extraAttributes : null;
 
-      // Veri Temizliği & Fallback
-      if (!cleanRow.name || !cleanRow.sku) {
-        skippedCount++;
-        return;
-      }
+      if (!cleanRow.name || !cleanRow.sku) return;
 
-      // Stok
       cleanRow.currentStock = parseInt(cleanRow.currentStock) || 0;
-      
-      // Kritik Stok
       cleanRow.criticalThreshold = parseInt(cleanRow.criticalThreshold) || 10;
 
-      // Fiyat Temizliği (150,50 TL -> 150.50)
       if (cleanRow.price) {
         let p = cleanRow.price.toString()
-          .replace(/[^\d,.-]/g, "") // Sadece rakam, virgül, nokta, eksi
-          .replace(",", "."); // Virgülü noktaya çevir
+          .replace(/[^\d,.-]/g, "")
+          .replace(",", ".");
         cleanRow.price = parseFloat(p) || 0;
       } else {
         cleanRow.price = 0;
@@ -131,7 +103,6 @@ export default function ImportExcelButton({ companyId }: ImportExcelButtonProps)
     startTransition(async () => {
       try {
         const result = await importProducts(companyId, importedProducts);
-        
         if (result?.success && result.batchId) {
           toast.success(t("importSuccessWithUndo", { count: importedProducts.length }), {
             duration: 10000,
@@ -148,7 +119,6 @@ export default function ImportExcelButton({ companyId }: ImportExcelButtonProps)
             }
           });
         }
-
         router.refresh();
       } catch (error) {
         toast.error(t("importError"));
@@ -157,62 +127,12 @@ export default function ImportExcelButton({ companyId }: ImportExcelButtonProps)
     });
   };
 
-  const processBOMImport = (rawData: any[]) => {
-    const bomRows: any[] = [];
-    
-    // Basit eşleştirme: Başlıklarda ana/parent ve bilesen/component ve miktar/qty ara
-    rawData.forEach(row => {
-        const keys = Object.keys(row);
-        let parentSku = "";
-        let componentSku = "";
-        let quantity = 0;
-
-        keys.forEach(k => {
-            const clean = normalize(k);
-            if (clean.includes("ana") || clean.includes("parent")) parentSku = row[k];
-            if (clean.includes("bilesen") || clean.includes("component")) componentSku = row[k];
-            if (clean.includes("miktar") || clean.includes("qty") || clean.includes("quantity")) quantity = parseFloat(row[k]);
-        });
-
-        if (parentSku && componentSku && quantity > 0) {
-            bomRows.push({ parentSku, componentSku, quantity });
-        }
-    });
-
-    if (bomRows.length === 0) {
-        toast.error(t("importNoData"));
-        return;
-    }
-
-    startTransition(async () => {
-        try {
-            const result = await importBOM(companyId, bomRows);
-            if (result.success) {
-                toast.success(t("bomImportSuccess"));
-                router.refresh();
-            }
-        } catch (err) {
-            toast.error(t("importError"));
-        }
-    });
-  };
-
   const downloadTemplate = () => {
-    let headers: string[][];
-    let filename: string;
-    
-    if (mode === "product") {
-      headers = [["Ürün Adı", "SKU", "Stok", "Birim Fiyat", "Kritik Eşik", "Raf Konumu"]];
-      filename = "Leadnova_Urun_Sablonu.xlsx";
-    } else {
-      headers = [["Ana_SKU", "Bilesen_SKU", "Miktar"]];
-      filename = "Leadnova_BOM_Sablonu.xlsx";
-    }
-
+    const headers = [["Ürün Adı", "SKU", "Stok", "Birim Fiyat", "Kritik Eşik", "Raf Konumu"]];
     const ws = XLSX.utils.aoa_to_sheet(headers);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Template");
-    XLSX.writeFile(wb, filename);
+    XLSX.writeFile(wb, "Leadnova_Urun_Sablonu.xlsx");
   };
 
   return (
@@ -225,21 +145,6 @@ export default function ImportExcelButton({ companyId }: ImportExcelButtonProps)
         className="hidden"
       />
       
-      <div className="flex bg-slate-800/50 p-1 rounded-xl border border-slate-700">
-        <button
-          onClick={() => setMode("product")}
-          className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${mode === "product" ? "bg-indigo-600 text-white shadow-md" : "text-slate-400 hover:text-white"}`}
-        >
-          {t("products")}
-        </button>
-        <button
-          onClick={() => setMode("bom")}
-          className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${mode === "bom" ? "bg-indigo-600 text-white shadow-md" : "text-slate-400 hover:text-white"}`}
-        >
-          {t("bom")}
-        </button>
-      </div>
-
       <button
         onClick={() => fileInputRef.current?.click()}
         disabled={isPending}
@@ -248,7 +153,7 @@ export default function ImportExcelButton({ companyId }: ImportExcelButtonProps)
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" />
         </svg>
-        {isPending ? t("importing") : (mode === "product" ? t("importExcel") : t("productTree") + " " + t("importExcel"))}
+        {isPending ? t("importing") : t("importExcel")}
       </button>
 
       <button
