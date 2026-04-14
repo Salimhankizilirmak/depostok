@@ -26,6 +26,7 @@ export const products = sqliteTable("products", {
   criticalThreshold: integer("critical_threshold").notNull().default(10),
   location: text("location"),
   attributes: text("attributes"),
+  importBatchId: text("import_batch_id"),
 }, (table) => ({
   companySkuIndex: uniqueIndex("company_sku_idx").on(table.companyId, table.sku),
 }));

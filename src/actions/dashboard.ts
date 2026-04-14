@@ -114,7 +114,9 @@ export async function importProducts(companyId: string, productsArray: any[]) {
   if (!user) throw new Error("Oturum açılmadı.");
 
   // Dizi boşsa çık
-  if (productsArray.length === 0) return;
+  if (productsArray.length === 0) return { success: true, count: 0 };
+
+  const batchId = crypto.randomUUID();
 
   // Veriyi database formatına çevir
   const values = productsArray.map((p) => ({
@@ -126,6 +128,7 @@ export async function importProducts(companyId: string, productsArray: any[]) {
     criticalThreshold: p.criticalThreshold || 10,
     location: p.location || null,
     attributes: p.attributes ? JSON.stringify(p.attributes) : null,
+    importBatchId: batchId,
   }));
 
   // Chunking (toplu ekleme sınırı varsa diye, ama burada direkt ekliyoruz)
@@ -135,6 +138,7 @@ export async function importProducts(companyId: string, productsArray: any[]) {
     .onConflictDoNothing({ target: [products.companyId, products.sku] });
 
   revalidatePath("/dashboard");
+  return { success: true, count: values.length, batchId };
 }
 
 export async function deleteProduct(productId: string, companyId: string) {
@@ -149,6 +153,22 @@ export async function deleteProduct(productId: string, companyId: string) {
   }
 
   await db.delete(products).where(eq(products.id, productId));
+
+  revalidatePath("/dashboard");
+}
+
+export async function undoImportProducts(batchId: string, companyId: string) {
+  const user = await currentUser();
+  const email = user?.emailAddresses?.[0]?.emailAddress;
+  if (!email) throw new Error("Oturum açılmadı.");
+
+  const { getCompanyAndRole } = await import("@/lib/auth-repair");
+  const firma = await getCompanyAndRole(email);
+  if (!firma || firma.id !== companyId || firma.userRole !== "Yönetici") {
+    throw new Error("Bu işlemi yapmaya yetkiniz yok.");
+  }
+
+  await db.delete(products).where(eq(products.importBatchId, batchId));
 
   revalidatePath("/dashboard");
 }

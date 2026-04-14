@@ -68,12 +68,24 @@
     "delete": "حذف",
     "cancel": "إلغاء",
     "deleteSuccess": "تم حذف المنتج بنجاح.",
-    "deleteError": "حدث خطأ أثناء الحذف."
+    "deleteError": "حدث خطأ أثناء الحذف.",
+    "activateLocationSystem": "تفعيل نظام الرفوف/المواقع",
+    "settings": "الإعدادات",
+    "locationSystemUpdateSuccess": "تم تحديث إعدادات المستودع بنجاح.",
+    "importSuccessWithUndo": "تم استيراد {count} منتجاً بنجاح. يمكنك التراجع في حال وجود أخطاء.",
+    "undoAction": "تراجع عن الاستيراد",
+    "undoSuccess": "تم التراجع عن عملية الاستيراد بنجاح. تم إزالة المنتجات الجديدة.",
+    "undoError": "حدث خطأ أثناء التراجع أو انتهت صلاحية الجلسة.",
+    "location": "الموقع",
+    "aisle": "الممر",
+    "rack": "الرف",
+    "shelf": "السطح"
   },
   "Navigation": {
     "products": "المنتجات",
     "history": "سجل المخزون",
-    "team": "فريقنا"
+    "team": "فريقي",
+    "settings": "الإعدادات"
   },
   "Admin": {
     "title": "إدارة الشركات",

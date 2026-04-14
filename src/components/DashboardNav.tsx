@@ -16,10 +16,11 @@ export default function DashboardNav({ userRole }: DashboardNavProps) {
     { href: "/dashboard", label: t("products") },
     { href: "/dashboard/history", label: t("history") },
     { href: "/dashboard/team", label: t("team") },
+    { href: "/dashboard/settings", label: t("settings") },
   ];
 
   const filteredLinks = links.filter((link) => {
-    if (link.href === "/dashboard/team") {
+    if (link.href === "/dashboard/team" || link.href === "/dashboard/settings") {
       return userRole === "Yönetici";
     }
     return true;

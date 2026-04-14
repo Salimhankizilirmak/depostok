@@ -68,12 +68,20 @@
     "delete": "Delete",
     "cancel": "Cancel",
     "deleteSuccess": "Product deleted successfully.",
-    "deleteError": "An error occurred during deletion."
+    "deleteError": "An error occurred during deletion.",
+    "activateLocationSystem": "Activate Shelf/Location System",
+    "settings": "Settings",
+    "locationSystemUpdateSuccess": "Warehouse settings updated successfully.",
+    "importSuccessWithUndo": "{count} products imported successfully. Undo if any errors are found.",
+    "undoAction": "Undo Import",
+    "undoSuccess": "Import operation undone successfully. New products removed.",
+    "undoError": "An error occurred during undo or the session expired."
   },
   "Navigation": {
     "products": "Products",
     "history": "Stock History",
-    "team": "Our Team"
+    "team": "My Team",
+    "settings": "Settings"
   },
   "Admin": {
     "title": "Company Management",

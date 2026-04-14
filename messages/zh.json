@@ -68,12 +68,23 @@
     "delete": "删除",
     "cancel": "取消",
     "deleteSuccess": "产品已成功删除。",
-    "deleteError": "删除过程中发生错误。"
+    "deleteError": "删除过程中发生错误。",
+    "activateLocationSystem": "启用货位/位置系统",
+    "settings": "设置",
+    "locationSystemUpdateSuccess": "仓库设置更新成功。",
+    "importSuccessWithUndo": "{count} 个产品导入成功。如果发现错误，请撤回操作。",
+    "undoAction": "撤销导入",
+    "undoSuccess": "导入操作已成功撤销。新添加的产品已删除。",
+    "undoError": "撤销过程中出错或操作超时。",
+    "location": "位置",
+    "editLocation": "编辑位置",
+    "updateLocation": "更新位置"
   },
   "Navigation": {
     "products": "产品",
     "history": "库存历史",
-    "team": "团队"
+    "team": "我的团队",
+    "settings": "设置"
   },
   "Admin": {
     "title": "公司管理",

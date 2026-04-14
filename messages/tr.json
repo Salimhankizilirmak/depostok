@@ -68,12 +68,20 @@
     "delete": "Sil",
     "cancel": "Vazgeç",
     "deleteSuccess": "Ürün başarıyla silindi.",
-    "deleteError": "Silme işlemi sırasında bir hata oluştu."
+    "deleteError": "Silme işlemi sırasında bir hata oluştu.",
+    "activateLocationSystem": "Raf/Konum Sistemini Aktif Et",
+    "settings": "Ayarlar",
+    "locationSystemUpdateSuccess": "Depo ayarları başarıyla güncellendi.",
+    "importSuccessWithUndo": "{count} ürün başarıyla aktarıldı. Bir hata fark ederseniz şimdi işlemi geri alabilirsiniz.",
+    "undoAction": "İşlemi Geri Al",
+    "undoSuccess": "İçe aktarma işlemi başarıyla geri alındı ve eklenen ürünler silindi.",
+    "undoError": "Geri alma işlemi sırasında bir hata oluştu veya süre doldu."
   },
   "Navigation": {
     "products": "Ürünler",
     "history": "Stok Geçmişi",
-    "team": "Ekibim"
+    "team": "Ekibim",
+    "settings": "Ayarlar"
   },
   "Admin": {
     "title": "Firma Yönetimi",

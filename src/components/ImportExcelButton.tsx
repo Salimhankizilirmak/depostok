@@ -4,7 +4,7 @@ import { useTransition, useRef } from "react";
 import { useTranslations } from "next-intl";
 import * as XLSX from "xlsx";
 import { toast } from "sonner";
-import { importProducts } from "@/actions/dashboard";
+import { importProducts, undoImportProducts } from "@/actions/dashboard";
 import { useRouter } from "next/navigation";
 
 interface ImportExcelButtonProps {
@@ -24,7 +24,7 @@ export default function ImportExcelButton({ companyId }: ImportExcelButtonProps)
     currentStock: ["stok", "adet", "miktar", "stock", "qty", "quantity"],
     price: ["fiyat", "price", "maliyet", "tutar"],
     criticalThreshold: ["kritik", "min", "limit"],
-    location: ["raf", "konum", "lokasyon", "location", "yer"],
+    location: ["raf", "konum", "yer", "location", "depo"],
   };
 
   const cleanHeader = (h: string) => h.toString().toLowerCase().replace(/\s+/g, "");
@@ -111,12 +111,25 @@ export default function ImportExcelButton({ companyId }: ImportExcelButtonProps)
 
     startTransition(async () => {
       try {
-        await importProducts(companyId, importedProducts);
-        toast.success(t("importResult", {
-          total: totalRead,
-          success: importedProducts.length,
-          skipped: skippedCount
-        }));
+        const result = await importProducts(companyId, importedProducts);
+        
+        if (result?.success) {
+          toast.success(t("importSuccessWithUndo", { count: importedProducts.length }), {
+            duration: 10000,
+            action: {
+              label: t("undoAction"),
+              onClick: async () => {
+                try {
+                  await undoImportProducts(result.batchId, companyId);
+                  toast.success(t("undoSuccess"));
+                } catch (err) {
+                  toast.error(t("undoError"));
+                }
+              }
+            }
+          });
+        }
+
         router.refresh();
       } catch (error) {
         toast.error(t("importError"));
