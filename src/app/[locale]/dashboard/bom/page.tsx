@@ -13,7 +13,7 @@ export default async function BOMPage() {
   if (!email) redirect("/");
 
   const firma = await getCompanyAndRole(email);
-  const allowedRoles = ["Yönetici", "Super Admin", "Mühendis", "Satın Alma"];
+  const allowedRoles = ["Yönetici", "Super Admin", "Mühendis", "Yetkili"];
 
   if (!firma || !allowedRoles.includes(firma.userRole)) {
     redirect("/dashboard");

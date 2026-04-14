@@ -13,7 +13,7 @@ export async function saveBOM(companyId: string, parentProductId: string, compon
 
   const { getCompanyAndRole } = await import("@/lib/auth-repair");
   const firma = await getCompanyAndRole(email);
-  const allowedRoles = ["Yönetici", "Super Admin", "Mühendis", "Satın Alma"];
+  const allowedRoles = ["Yönetici", "Super Admin", "Mühendis", "Yetkili"];
   
   if (!firma || firma.id !== companyId || !allowedRoles.includes(firma.userRole)) {
     throw new Error("Bu işlemi yapmaya yetkiniz yok.");
