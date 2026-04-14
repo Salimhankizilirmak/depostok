@@ -91,7 +91,12 @@
     "anaSku": "主 SKU",
     "bilesenSku": "组件 SKU",
     "quantity": "数量",
-    "bomImportSuccess": "BOM 已成功导入。",
+    "bomImportSuccess": "物料清单导入成功。",
+    "produceItem": "生产物品",
+    "productionQuantity": "生产数量",
+    "insufficientRawMaterial": "原材料不足: {name}",
+    "productionSuccess": "生产成功完成。",
+    "close": "关闭",
     "components": "组件",
     "productTree": "产品树",
     "assemblyOut": "执行组装出库"

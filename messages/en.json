@@ -88,7 +88,12 @@
     "anaSku": "Parent SKU",
     "bilesenSku": "Component SKU",
     "quantity": "Quantity",
-    "bomImportSuccess": "BOMs imported successfully.",
+    "bomImportSuccess": "Bill of Materials imported successfully.",
+    "produceItem": "Produce Item",
+    "productionQuantity": "Production Quantity",
+    "insufficientRawMaterial": "Insufficient raw material: {name}",
+    "productionSuccess": "Production completed successfully.",
+    "close": "Close",
     "components": "Components",
     "productTree": "Product Tree",
     "assemblyOut": "Perform Assembly Out"

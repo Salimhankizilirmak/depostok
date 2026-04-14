@@ -2,8 +2,8 @@
 
 import { currentUser } from "@clerk/nextjs/server";
 import { db } from "@/db";
-import { products, productTrees } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
+import { products, productTrees, stockMovements } from "@/db/schema";
+import { eq, and, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 export async function saveBOM(companyId: string, parentProductId: string, components: { childProductId: string; quantity: number }[]) {
@@ -86,4 +86,76 @@ export async function importBOM(companyId: string, bomRows: { parentSku: string;
 
   revalidatePath("/dashboard/bom");
   return { success: true, count: valuesToInsert.length };
+}
+
+export async function produceItem(companyId: string, parentProductId: string, quantity: number) {
+  const user = await currentUser();
+  const email = user?.emailAddresses?.[0]?.emailAddress;
+  if (!email) throw new Error("Oturum açılmadı.");
+
+  const { getCompanyAndRole } = await import("@/lib/auth-repair");
+  const firma = await getCompanyAndRole(email);
+  const allowedRoles = ["Yönetici", "Super Admin", "Mühendis", "Yetkili"];
+  if (!firma || firma.id !== companyId || !allowedRoles.includes(firma.userRole)) {
+    throw new Error("Yetkisiz işlem.");
+  }
+
+  // 1. Reçeteyi bul
+  const bomComponents = await db.select().from(productTrees).where(and(eq(productTrees.parentProductId, parentProductId), eq(productTrees.companyId, companyId)));
+  if (bomComponents.length === 0) throw new Error("Ürün reçetesi bulunamadı.");
+
+  const componentIds = bomComponents.map(c => c.childProductId);
+  const componentProducts = await db.select().from(products).where(and(inArray(products.id, componentIds), eq(products.companyId, companyId)));
+  
+  const productMap = new Map(componentProducts.map(p => [p.id, p]));
+
+  // 2. Stok kontrolü
+  for (const comp of bomComponents) {
+    const p = productMap.get(comp.childProductId);
+    const required = comp.quantity * quantity;
+    if (!p || p.currentStock < required) {
+      throw new Error(`Yetersiz ham madde: ${p?.name || "Bilinmiyor"}`);
+    }
+  }
+
+  // 3. Üretim işlemi (Transaction)
+  await db.transaction(async (tx) => {
+    // Ham madde düşüşleri
+    for (const comp of bomComponents) {
+        const required = comp.quantity * quantity;
+        const p = productMap.get(comp.childProductId)!;
+        
+        await tx.update(products).set({
+            currentStock: p.currentStock - required
+        }).where(eq(products.id, comp.childProductId));
+
+        await tx.insert(stockMovements).values({
+            companyId,
+            productId: comp.childProductId,
+            type: "out",
+            quantity: required,
+            userEmail: email,
+            description: "Üretim Çıkışı"
+        });
+    }
+
+    // Mamul artışı
+    const parentProduct = await tx.select().from(products).where(eq(products.id, parentProductId)).then(res => res[0]);
+    await tx.update(products).set({
+        currentStock: parentProduct.currentStock + quantity
+    }).where(eq(products.id, parentProductId));
+
+    await tx.insert(stockMovements).values({
+        companyId,
+        productId: parentProductId,
+        type: "in",
+        quantity,
+        userEmail: email,
+        description: "Üretim Girişi"
+    });
+  });
+
+  revalidatePath("/dashboard");
+  revalidatePath("/dashboard/bom");
+  return { success: true };
 }

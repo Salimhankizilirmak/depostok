@@ -88,7 +88,12 @@
     "anaSku": "Ana Ürün SKU",
     "bilesenSku": "Bileşen SKU",
     "quantity": "Miktar",
-    "bomImportSuccess": "Ürün ağaçları başarıyla aktarıldı.",
+    "bomImportSuccess": "Ürün ağacı başarıyla yüklendi.",
+    "produceItem": "Üretim Yap",
+    "productionQuantity": "Üretilecek Miktar",
+    "insufficientRawMaterial": "Yetersiz ham madde: {name}",
+    "productionSuccess": "Üretim başarıyla tamamlandı.",
+    "close": "Kapat",
     "components": "Bileşenler",
     "productTree": "Ürün Ağacı",
     "assemblyOut": "Montaj Çıkışı Yap"

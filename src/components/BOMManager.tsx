@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { saveBOM } from "@/actions/bom";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import ProduceModal from "./ProduceModal";
 
 interface Product {
   id: string;
@@ -29,12 +30,13 @@ export default function BOMManager({ companyId, products, existingTrees }: BOMMa
   const t = useTranslations("Dashboard");
   const [selectedParentId, setSelectedParentId] = useState<string>("");
   const [isPending, startTransition] = useTransition();
+  const [produceProduct, setProduceProduct] = useState<{id: string, name: string} | null>(null);
   const router = useRouter();
 
-  // Seçili ana ürünün bileşenlerini filtrele
-  const currentComponents = existingTrees
-    .filter((t) => t.parentProductId === selectedParentId)
-    .map((t) => ({ childProductId: t.childProductId, quantity: t.quantity }));
+  // Reçetesi olan benzersiz ürünleri grupla
+  const productsWithBOM = Array.from(new Set(existingTrees.map(t => t.parentProductId)))
+    .map(id => products.find(p => p.id === id))
+    .filter((p): p is Product => !!p);
 
   const [localComponents, setLocalComponents] = useState<{ childProductId: string; quantity: number }[]>([]);
 
@@ -79,106 +81,150 @@ export default function BOMManager({ companyId, products, existingTrees }: BOMMa
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      {/* Sol Panel: Ana Ürün Seçimi */}
-      <div className="lg:col-span-1 bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4">
-        <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider">
-          {t("productName")} (Ana Ürün)
-        </label>
-        <select
-          value={selectedParentId}
-          onChange={(e) => handleParentChange(e.target.value)}
-          className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all outline-none"
-        >
-          <option value="">Seçiniz...</option>
-          {products.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.name} {p.sku ? `(${p.sku})` : ""}
-            </option>
-          ))}
-        </select>
-
-        {selectedParentId && (
-            <div className="pt-4 border-t border-slate-800">
-                <button
-                    onClick={handleSave}
-                    disabled={isPending}
-                    className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-xl transition-all shadow-lg shadow-indigo-900/20 disabled:opacity-50"
-                >
-                    {isPending ? t("saving") : t("saveProduct")}
-                </button>
-            </div>
-        )}
-      </div>
-
-      {/* Sağ Panel: Bileşenler */}
-      <div className="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-6">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
-                <polyline points="3.27 6.96 12 12.01 20.73 6.96" /><line x1="12" y1="22.08" x2="12" y2="12" />
-            </svg>
-            {t("components")}
-          </h2>
-          <button
-            onClick={addComponent}
-            disabled={!selectedParentId}
-            className="bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 border border-indigo-500/20 px-4 py-1.5 rounded-xl text-xs font-bold transition-all disabled:opacity-30"
+    <div className="space-y-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Sol Panel: Ana Ürün Seçimi */}
+        <div className="lg:col-span-1 bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4 shadow-xl shadow-black/20">
+          <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider">
+            {t("productName")} (Ana Ürün)
+          </label>
+          <select
+            value={selectedParentId}
+            onChange={(e) => handleParentChange(e.target.value)}
+            className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all outline-none"
           >
-            + {t("addAttribute")}
-          </button>
-        </div>
+            <option value="">Seçiniz...</option>
+            {products.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name} {p.sku ? `(${p.sku})` : ""}
+              </option>
+            ))}
+          </select>
 
-        <div className="space-y-3">
-          {localComponents.map((comp, index) => (
-            <div key={index} className="flex flex-col sm:flex-row items-center gap-3 animate-in fade-in slide-in-from-top-1">
-              <div className="flex-1 w-full">
-                <select
-                  value={comp.childProductId}
-                  onChange={(e) => updateComponent(index, "childProductId", e.target.value)}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-xs text-white focus:ring-1 focus:ring-indigo-500 transition-all outline-none"
-                >
-                  <option value="">Bileşen Seçin...</option>
-                  {products
-                    .filter(p => p.id !== selectedParentId)
-                    .map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.name} {p.sku ? `(${p.sku})` : ""}
-                    </option>
-                  ))}
-                </select>
+          {selectedParentId && (
+              <div className="pt-4 border-t border-slate-800">
+                  <button
+                      onClick={handleSave}
+                      disabled={isPending}
+                      className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-xl transition-all shadow-lg shadow-indigo-900/20 disabled:opacity-50"
+                  >
+                      {isPending ? t("saving") : t("saveProduct")}
+                  </button>
               </div>
-              <div className="w-full sm:w-32">
-                <input
-                  type="number"
-                  min="0.001"
-                  step="0.001"
-                  placeholder={t("quantity")}
-                  value={comp.quantity}
-                  onChange={(e) => updateComponent(index, "quantity", parseFloat(e.target.value))}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-xs text-white focus:ring-1 focus:ring-indigo-500 transition-all outline-none"
-                />
-              </div>
-              <button
-                onClick={() => removeComponent(index)}
-                className="p-2 text-slate-500 hover:text-red-400 transition-colors"
-                title={t("delete")}
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M18 6L6 18M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-          ))}
-
-          {localComponents.length === 0 && (
-            <div className="text-center py-12 border-2 border-dashed border-slate-800 rounded-3xl">
-              <p className="text-slate-500 text-sm">Henüz bir bileşen eklenmedi.</p>
-            </div>
           )}
         </div>
+
+        {/* Sağ Panel: Bileşenler */}
+        <div className="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-6 shadow-xl shadow-black/20">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-bold text-white flex items-center gap-2">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                  <polyline points="3.27 6.96 12 12.01 20.73 6.96" /><line x1="12" y1="22.08" x2="12" y2="12" />
+              </svg>
+              {t("components")}
+            </h2>
+            <button
+              onClick={addComponent}
+              disabled={!selectedParentId}
+              className="bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 border border-indigo-500/20 px-4 py-1.5 rounded-xl text-xs font-bold transition-all disabled:opacity-30"
+            >
+              + {t("addAttribute")}
+            </button>
+          </div>
+
+          <div className="space-y-3">
+            {localComponents.map((comp, index) => (
+              <div key={index} className="flex flex-col sm:flex-row items-center gap-3 animate-in fade-in slide-in-from-top-1">
+                <div className="flex-1 w-full">
+                  <select
+                    value={comp.childProductId}
+                    onChange={(e) => updateComponent(index, "childProductId", e.target.value)}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-xs text-white focus:ring-1 focus:ring-indigo-500 transition-all outline-none"
+                  >
+                    <option value="">Bileşen Seçin...</option>
+                    {products
+                      .filter(p => p.id !== selectedParentId)
+                      .map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.name} {p.sku ? `(${p.sku})` : ""}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="w-full sm:w-32">
+                  <input
+                    type="number"
+                    min="0.001"
+                    step="0.001"
+                    placeholder={t("quantity")}
+                    value={comp.quantity}
+                    onChange={(e) => updateComponent(index, "quantity", parseFloat(e.target.value))}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-xs text-white focus:ring-1 focus:ring-indigo-500 transition-all outline-none"
+                  />
+                </div>
+                <button
+                  onClick={() => removeComponent(index)}
+                  className="p-2 text-slate-500 hover:text-red-400 transition-colors"
+                  title={t("delete")}
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M18 6L6 18M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            ))}
+
+            {localComponents.length === 0 && (
+              <div className="text-center py-12 border-2 border-dashed border-slate-800 rounded-3xl">
+                <p className="text-slate-500 text-sm">Henüz bir bileşen eklenmedi.</p>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
+
+      {/* Alt Panel: Aktif Reçeteler ve Üretim */}
+      <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-xl shadow-black/20">
+        <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M22 10v6M2 10v6M6 4v16M18 4v16M6 10h12M6 16h12" />
+            </svg>
+            Reçeteli Ürünler ve Üretim
+        </h2>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            {productsWithBOM.map(product => (
+                <div key={product.id} className="bg-slate-800/40 border border-slate-800 rounded-2xl p-5 flex items-center justify-between hover:border-emerald-500/30 transition-all group">
+                    <div className="min-w-0 pr-4">
+                        <h3 className="text-white font-bold truncate">{product.name}</h3>
+                        <p className="text-slate-500 text-xs tracking-wider">{product.sku || "SKU-YOK"}</p>
+                    </div>
+                    <button
+                        onClick={() => setProduceProduct({ id: product.id, name: product.name })}
+                        className="bg-emerald-600/10 hover:bg-emerald-600 text-emerald-500 hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition-all border border-emerald-500/20 group-hover:border-emerald-500"
+                    >
+                        {t("produceItem")}
+                    </button>
+                </div>
+            ))}
+
+            {productsWithBOM.length === 0 && (
+                <div className="col-span-full py-12 text-center text-slate-500 italic bg-slate-900/50 rounded-2xl border border-dashed border-slate-800">
+                    Henüz tanımlanmış bir reçete bulunmuyor.
+                </div>
+            )}
+        </div>
+      </div>
+
+      {produceProduct && (
+        <ProduceModal 
+          companyId={companyId}
+          productId={produceProduct.id}
+          productName={produceProduct.name}
+          onClose={() => setProduceProduct(null)}
+        />
+      )}
     </div>
   );
 }

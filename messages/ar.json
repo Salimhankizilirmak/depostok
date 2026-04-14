@@ -93,6 +93,11 @@
     "bilesenSku": "رمز المكون (SKU)",
     "quantity": "الكمية",
     "bomImportSuccess": "تم استيراد قائمة المواد بنجاح.",
+    "produceItem": "إنتاج الصنف",
+    "productionQuantity": "كمية الإنتاج",
+    "insufficientRawMaterial": "المواد الخام غير كافية: {name}",
+    "productionSuccess": "تم الانتهاء من الإنتاج بنجاح.",
+    "close": "إغلاق",
     "components": "المكونات",
     "productTree": "شجرة المنتج",
     "assemblyOut": "تنفيذ إخراج تجميع"
