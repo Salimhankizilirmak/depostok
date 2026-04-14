@@ -75,7 +75,13 @@
     "importSuccessWithUndo": "{count} products imported successfully. Undo if any errors are found.",
     "undoAction": "Undo Import",
     "undoSuccess": "Import operation undone successfully. New products removed.",
-    "undoError": "An error occurred during undo or the session expired."
+    "undoError": "An error occurred during undo or the session expired.",
+    "edit": "Edit",
+    "editProduct": "Edit Product",
+    "saveChanges": "Save Changes",
+    "productUpdated": "Product updated successfully.",
+    "newAttribute": "New Attribute",
+    "editSuccess": "Changes applied successfully."
   },
   "Navigation": {
     "products": "Products",

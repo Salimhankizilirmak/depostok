@@ -9,9 +9,27 @@ interface Attribute {
   value: string;
 }
 
-export default function AttributesInput() {
+interface AttributesInputProps {
+  initialValue?: string; // JSON string
+}
+
+export default function AttributesInput({ initialValue }: AttributesInputProps) {
   const t = useTranslations("Dashboard");
-  const [attributes, setAttributes] = useState<Attribute[]>([]);
+  const [attributes, setAttributes] = useState<Attribute[]>(() => {
+    if (initialValue) {
+      try {
+        const parsed = JSON.parse(initialValue);
+        return Object.entries(parsed).map(([name, value]) => ({
+          id: crypto.randomUUID(),
+          name,
+          value: String(value)
+        }));
+      } catch (e) {
+        console.error("Failed to parse initial attributes", e);
+      }
+    }
+    return [];
+  });
 
   // attributes değiştiğinde hidden input'u JSON string ile güncellemek için bir mekanizma
   // Ancak form içinde olduğu için hidden input değerini burada tutacağız.

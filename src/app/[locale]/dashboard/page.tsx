@@ -13,6 +13,7 @@ import { getTranslations } from "next-intl/server";
 import { like, lte, count } from "drizzle-orm";
 import DashboardSearch from "@/components/DashboardSearch";
 import DeleteProductButton from "@/components/DeleteProductButton";
+import EditProductModal from "@/components/EditProductModal";
 import Pagination from "@/components/Pagination";
 
 export const dynamic = "force-dynamic";
@@ -357,7 +358,14 @@ export default async function DashboardPage({
                         <div className="flex items-center gap-2">
                           <StockButtons productId={urun.id} companyId={firma.id} productName={urun.name} />
                           {firma.userRole === "Yönetici" && (
-                            <DeleteProductButton productId={urun.id} companyId={firma.id} />
+                            <>
+                              <EditProductModal 
+                                product={urun} 
+                                companyId={firma.id} 
+                                locationSystemEnabled={firma.locationSystemEnabled} 
+                              />
+                              <DeleteProductButton productId={urun.id} companyId={firma.id} />
+                            </>
                           )}
                         </div>
                       </td>

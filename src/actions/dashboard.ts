@@ -172,3 +172,29 @@ export async function undoImportProducts(batchId: string, companyId: string) {
 
   revalidatePath("/dashboard");
 }
+
+export async function updateProduct(productId: string, companyId: string, data: {
+  name?: string;
+  sku?: string;
+  price?: number;
+  criticalThreshold?: number;
+  location?: string;
+  attributes?: string;
+}) {
+  const user = await currentUser();
+  const email = user?.emailAddresses?.[0]?.emailAddress;
+  if (!email) throw new Error("Oturum açılmadı.");
+
+  // Role kontrolü (Sadece Yönetici)
+  const { getCompanyAndRole } = await import("@/lib/auth-repair");
+  const firma = await getCompanyAndRole(email);
+  if (!firma || firma.id !== companyId || (firma.userRole !== "Yönetici" && firma.userRole !== "Super Admin")) {
+    throw new Error("Bu işlemi yapmaya yetkiniz yok.");
+  }
+
+  await db.update(products).set({
+    ...data,
+  }).where(and(eq(products.id, productId), eq(products.companyId, companyId)));
+
+  revalidatePath("/dashboard");
+}

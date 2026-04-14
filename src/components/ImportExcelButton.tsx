@@ -19,15 +19,30 @@ export default function ImportExcelButton({ companyId }: ImportExcelButtonProps)
 
   // Fuzzy Matching kelime grupları
   const schemaMap = {
-    name: ["ad", "isim", "urunadi", "name", "title", "malzeme"],
+    name: ["ad", "isim", "urun", "name", "title", "malzeme"],
     sku: ["sku", "barkod", "kod", "code", "itemno"],
     currentStock: ["stok", "adet", "miktar", "stock", "qty", "quantity"],
     price: ["fiyat", "price", "maliyet", "tutar"],
     criticalThreshold: ["kritik", "min", "limit"],
-    location: ["raf", "konum", "yer", "location", "depo"],
+    location: ["raf", "konum", "yer", "location", "lokasyon"],
   };
 
-  const cleanHeader = (h: string) => h.toString().toLowerCase().replace(/\s+/g, "");
+  const normalize = (h: string) => h.toString().toLowerCase().trim().replace(/[^a-z0-9ğüşıöç]/g, "");
+
+  const findBestMatch = (header: string) => {
+    const clean = normalize(header);
+    
+    // 1. Önce Stok (Miktar) kelimesini ara (Keyword Collision önceliği)
+    if (schemaMap.currentStock.some(alias => clean.includes(alias))) return "currentStock";
+    
+    // 2. Diğerlerini tara
+    for (const [field, aliases] of Object.entries(schemaMap)) {
+      if (field === "currentStock") continue;
+      if (aliases.some(alias => clean.includes(alias))) return field;
+    }
+    
+    return null;
+  };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -57,16 +72,14 @@ export default function ImportExcelButton({ companyId }: ImportExcelButtonProps)
     rawData.forEach((row) => {
       const cleanRow: any = {};
       const keys = Object.keys(row);
-
-      // Sütun eşleştirme
       const matchedKeys = new Set<string>();
-      Object.entries(schemaMap).forEach(([field, aliases]) => {
-        const foundKey = keys.find((k) => 
-          aliases.some(alias => cleanHeader(k).includes(alias))
-        );
-        if (foundKey) {
-          cleanRow[field] = row[foundKey];
-          matchedKeys.add(foundKey);
+
+      // Akıllı Eşleştirme
+      keys.forEach((key) => {
+        const field = findBestMatch(key);
+        if (field && !cleanRow[field]) {
+          cleanRow[field] = row[key];
+          matchedKeys.add(key);
         }
       });
 

@@ -78,7 +78,13 @@
     "undoError": "撤销过程中出错或操作超时。",
     "location": "位置",
     "editLocation": "编辑位置",
-    "updateLocation": "更新位置"
+    "updateLocation": "更新位置",
+    "edit": "编辑",
+    "editProduct": "编辑产品",
+    "saveChanges": "保存更改",
+    "productUpdated": "产品更新成功。",
+    "newAttribute": "新属性",
+    "editSuccess": "更改已成功应用。"
   },
   "Navigation": {
     "products": "产品",

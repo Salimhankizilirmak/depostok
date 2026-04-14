@@ -79,7 +79,13 @@
     "location": "الموقع",
     "aisle": "الممر",
     "rack": "الرف",
-    "shelf": "السطح"
+    "shelf": "السطح",
+    "edit": "تعديل",
+    "editProduct": "تعديل المنتج",
+    "saveChanges": "حفظ التغييرات",
+    "productUpdated": "تم تحديث المنتج بنجاح.",
+    "newAttribute": "صفة جديدة",
+    "editSuccess": "تم تطبيق التغييرات بنجاح."
   },
   "Navigation": {
     "products": "المنتجات",

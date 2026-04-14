@@ -75,7 +75,13 @@
     "importSuccessWithUndo": "{count} ürün başarıyla aktarıldı. Bir hata fark ederseniz şimdi işlemi geri alabilirsiniz.",
     "undoAction": "İşlemi Geri Al",
     "undoSuccess": "İçe aktarma işlemi başarıyla geri alındı ve eklenen ürünler silindi.",
-    "undoError": "Geri alma işlemi sırasında bir hata oluştu veya süre doldu."
+    "undoError": "Geri alma işlemi sırasında bir hata oluştu veya süre doldu.",
+    "edit": "Düzenle",
+    "editProduct": "Ürünü Düzenle",
+    "saveChanges": "Değişiklikleri Kaydet",
+    "productUpdated": "Ürün başarıyla güncellendi.",
+    "newAttribute": "Yeni Özellik",
+    "editSuccess": "Değişiklikler başarıyla uygulandı."
   },
   "Navigation": {
     "products": "Ürünler",
