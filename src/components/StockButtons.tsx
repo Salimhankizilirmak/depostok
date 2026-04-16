@@ -57,12 +57,13 @@ export default function StockButtons({
           onClick={() => openModal("in")}
           disabled={isPending}
           title="Stok Girişi"
-          className="flex items-center gap-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 hover:text-emerald-300 text-xs font-semibold rounded-lg px-3 py-1.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex items-center justify-center gap-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 hover:text-emerald-300 text-sm sm:text-xs font-bold sm:font-semibold rounded-xl sm:rounded-lg px-4 py-3 sm:px-3 sm:py-1.5 min-w-[80px] sm:min-w-0 transition-all disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
         >
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="sm:w-3 sm:h-3">
             <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
           </svg>
-          Giriş
+          <span className="hidden sm:inline">Giriş</span>
+          <span className="sm:hidden">Giriş</span>
         </button>
 
         {/* Stok Çıkış */}
@@ -70,12 +71,13 @@ export default function StockButtons({
           onClick={() => openModal("out")}
           disabled={isPending}
           title="Stok Çıkışı"
-          className="flex items-center gap-1.5 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 hover:text-red-300 text-xs font-semibold rounded-lg px-3 py-1.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex items-center justify-center gap-1.5 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 hover:text-red-300 text-sm sm:text-xs font-bold sm:font-semibold rounded-xl sm:rounded-lg px-4 py-3 sm:px-3 sm:py-1.5 min-w-[80px] sm:min-w-0 transition-all disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
         >
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="sm:w-3 sm:h-3">
             <line x1="5" y1="12" x2="19" y2="12" />
           </svg>
-          Çıkış
+          <span className="hidden sm:inline">Çıkış</span>
+          <span className="sm:hidden">Çıkış</span>
         </button>
       </div>
 

@@ -5,6 +5,10 @@ import DashboardNav from "@/components/DashboardNav";
 import { getCompanyAndRole } from "@/lib/auth-repair";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { getTranslations } from "next-intl/server";
+import { db } from "@/db";
+import { companies } from "@/db/schema";
+import { eq } from "drizzle-orm";
+import { sendWelcomeEmail } from "@/lib/mail";
 
 export default async function DashboardLayout({
   children,
@@ -13,8 +17,24 @@ export default async function DashboardLayout({
 }) {
   const user = await currentUser();
   const email = user?.emailAddresses?.[0]?.emailAddress ?? null;
+  const fullName = user ? `${user.firstName || ""} ${user.lastName || ""}`.trim() || user.username : "Yöneticimiz";
 
   const firma = email ? await getCompanyAndRole(email) : null;
+
+  // ── Hoş Geldin Maili Tetikleyicisi ───────────────────────────────────────────
+  if (firma && !firma.welcomeEmailSent && email) {
+    // 1) Maili gönder (Non-blocking)
+    sendWelcomeEmail(email, fullName || "Yöneticimiz").catch(err => {
+      console.error("Hoş geldin maili gönderim hatası:", err);
+    });
+
+    // 2) Veritabanında flag'i güncelle (Async)
+    // Bloklamaması için async olarak güncelliyoruz ancak wait etmiyoruz ki sayfa hızlı yüklensin
+    db.update(companies)
+      .set({ welcomeEmailSent: true })
+      .where(eq(companies.id, firma.id))
+      .catch(err => console.error("DB welcomeEmailSent update hatası:", err));
+  }
 
   const t = await getTranslations("Dashboard");
 

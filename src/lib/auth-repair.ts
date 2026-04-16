@@ -18,6 +18,7 @@ export async function getCompanyAndRole(email: string) {
       locationSystemEnabled: companies.locationSystemEnabled,
       locationFormat: companies.locationFormat,
       bomSystemEnabled: companies.bomSystemEnabled,
+      welcomeEmailSent: companies.welcomeEmailSent,
       userRole: companyUsers.role,
       userId: companyUsers.id,
     })
@@ -35,6 +36,7 @@ export async function getCompanyAndRole(email: string) {
       locationSystemEnabled: existing.locationSystemEnabled,
       locationFormat: existing.locationFormat,
       bomSystemEnabled: existing.bomSystemEnabled,
+      welcomeEmailSent: existing.welcomeEmailSent,
       userRole: existing.userRole as string,
       userId: existing.userId,
     };
@@ -64,6 +66,7 @@ export async function getCompanyAndRole(email: string) {
       locationSystemEnabled: companyAdmin.locationSystemEnabled,
       locationFormat: companyAdmin.locationFormat,
       bomSystemEnabled: companyAdmin.bomSystemEnabled,
+      welcomeEmailSent: companyAdmin.welcomeEmailSent,
       userRole: "Yönetici",
       userId: newMember.id,
     };

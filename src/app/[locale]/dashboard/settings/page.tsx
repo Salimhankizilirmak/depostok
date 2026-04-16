@@ -4,6 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import LocationToggle from "@/components/LocationToggle";
 import BOMToggle from "@/components/BOMToggle";
+import IdentityBinder from "@/components/IdentityBinder";
 
 export default async function SettingsPage() {
   const user = await currentUser();
@@ -53,12 +54,7 @@ export default async function SettingsPage() {
           />
         </div>
 
-        {/* Placeholder for other settings */}
-        <div className="bg-slate-900/40 border border-slate-800/60 border-dashed rounded-3xl p-8 flex items-center justify-center">
-          <p className="text-slate-600 text-sm italic italic">
-            Gelecekteki ayarlar buraya eklenecektir...
-          </p>
-        </div>
+        <IdentityBinder />
       </div>
     </div>
   );

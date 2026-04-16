@@ -5,6 +5,7 @@ import { db } from "@/db";
 import { companies, companyUsers } from "@/db/schema";
 import { revalidatePath } from "next/cache";
 import { eq } from "drizzle-orm";
+import { sendActivationEmail } from "@/lib/mail";
 
 export async function addCompany(formData: FormData) {
   const name = formData.get("name") as string;
@@ -25,6 +26,11 @@ export async function addCompany(formData: FormData) {
     companyId: newCompany.id,
     email: adminEmail.trim(),
     role: "Yönetici",
+  });
+
+  // 3) Aktivasyon Mailini Gönder (Non-blocking)
+  sendActivationEmail(adminEmail.trim()).catch(err => {
+    console.error("Aktivasyon maili gönderim hatası:", err);
   });
 
   revalidatePath("/admin");

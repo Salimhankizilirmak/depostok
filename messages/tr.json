@@ -98,9 +98,21 @@
     "productTree": "Ürün Ağacı",
     "assemblyOut": "Montaj Çıkışı Yap"
   },
+  "Settings": {
+    "loginPreferences": "Giriş Tercihleri",
+    "loginPreferencesDesc": "Google hesabınızı şifreli bir giriş yöntemine bağlayın.",
+    "setUsername": "Kullanıcı Adı Belirle",
+    "setPassword": "Şifre Belirle",
+    "fillAllFields": "Lütfen tüm alanları doldurun.",
+    "updateSuccess": "Hesap bilgileriniz başarıyla güncellendi.",
+    "updateFailed": "Güncelleme başarısız oldu.",
+    "save": "Tercihleri Kaydet",
+    "saving": "Kaydediliyor..."
+  },
   "Navigation": {
-    "products": "Ürünler",
-    "history": "Stok Geçmişi",
+    "stockList": "Stok Listesi",
+    "movements": "Hareketler",
+    "recentMovements": "Son Hareketler",
     "team": "Ekibim",
     "settings": "Ayarlar",
     "bom": "Ürün Ağacı"
@@ -119,5 +131,19 @@
     "back": "Geri Dön",
     "management": "Yönetimi",
     "manageDesc": "Firmanın ekip üyelerini, rollerini ve erişim yetkilerini kontrol edin."
+  },
+  "Team": {
+    "addPerson": "Yeni Personel Ekle",
+    "personName": "Personel Adı",
+    "username": "Kullanıcı Adı",
+    "password": "Şifre",
+    "role": "Rol / Yetki",
+    "add": "Ekle",
+    "adding": "Ekleniyor...",
+    "listTitle": "Ekip Listesi",
+    "userCount": "kullanıcı",
+    "joined": "Katılım Tarihi",
+    "deleteConfirm": "Bu kullanıcıyı ekipten çıkarmak istediğinize emin misiniz?",
+    "namePlaceholder": "Örn: Ahmet Yılmaz"
   }
 }

@@ -98,9 +98,21 @@
     "productTree": "Product Tree",
     "assemblyOut": "Perform Assembly Out"
   },
+  "Settings": {
+    "loginPreferences": "Login Preferences",
+    "loginPreferencesDesc": "Link your Google account to a password-protected login.",
+    "setUsername": "Set Username",
+    "setPassword": "Set Password",
+    "fillAllFields": "Please fill in all fields.",
+    "updateSuccess": "Account information updated successfully.",
+    "updateFailed": "Update failed.",
+    "save": "Save Preferences",
+    "saving": "Saving..."
+  },
   "Navigation": {
-    "products": "Products",
-    "history": "Stock History",
+    "stockList": "Stock List",
+    "movements": "Movements",
+    "recentMovements": "Recent Movements",
     "team": "My Team",
     "settings": "Settings",
     "bom": "Product Tree"
@@ -119,5 +131,19 @@
     "back": "Back",
     "management": "Management",
     "manageDesc": "Control company team members, roles and access permissions."
+  },
+  "Team": {
+    "addPerson": "Add New Personnel",
+    "personName": "Personnel Name",
+    "username": "Username",
+    "password": "Password",
+    "role": "Role / Permission",
+    "add": "Add",
+    "adding": "Adding...",
+    "listTitle": "Team List",
+    "userCount": "users",
+    "joined": "Joined Date",
+    "deleteConfirm": "Are you sure you want to remove this user from the team?",
+    "namePlaceholder": "Ex: John Doe"
   }
 }
