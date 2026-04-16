@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^7.0.12",
+    "@clerk/themes": "^2.4.57",
     "@libsql/client": "^0.17.2",
     "dotenv": "^17.4.1",
     "drizzle-orm": "^0.45.2",
