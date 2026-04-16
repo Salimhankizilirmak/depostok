@@ -26,9 +26,14 @@ export const sendMail = async ({
     });
     console.log("Message sent: %s", info.messageId);
     return { success: true, messageId: info.messageId };
-  } catch (error) {
-    console.error("Error sending email:", error);
-    return { success: false, error };
+  } catch (error: any) {
+    if (error.code === 'EAUTH') {
+      console.error("KRİTİK MAİL HATASI: Gmail kimlik doğrulaması (App Password) geçersiz. Lütfen .env dosyasındaki GMAIL_APP_PASSWORD bilgisini kontrol edin.");
+    } else {
+      console.error("Error sending email:", error);
+    }
+    // Hata durumunda uygulamanın geri kalanının çökmemesi için sessizce hata dönüyoruz
+    return { success: false, error: error.message };
   }
 };
 

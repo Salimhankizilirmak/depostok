@@ -26,14 +26,14 @@ export default function IdentityBinder() {
     setSuccess(false);
 
     startTransition(async () => {
-      try {
-        await bindIdentitySA(username, password);
+      const result = await bindIdentitySA(username, password);
+      
+      if (result?.success) {
         setSuccess(true);
         setUsername("");
         setPassword("");
-      } catch (err: any) {
-        console.error(err);
-        setError(err.message || t("updateFailed"));
+      } else {
+        setError(result?.error || t("updateFailed"));
       }
     });
   };
@@ -50,6 +50,17 @@ export default function IdentityBinder() {
         <div>
           <h2 className="text-xl font-bold text-white">{t("loginPreferences")}</h2>
           <p className="text-slate-400 text-sm">{t("loginPreferencesDesc")}</p>
+        </div>
+      </div>
+
+      <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 mb-6">
+        <div className="flex gap-3">
+          <svg className="w-5 h-5 text-amber-500 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
+          </svg>
+          <p className="text-[11px] text-amber-200/80 leading-relaxed">
+            <strong>Önemli:</strong> Clerk varsayılan olarak en az 8 karakter şifre ister. Eğer "123" gibi kısa şifreler kullanmak istiyorsanız, Clerk panelinizden şifre politikasını (Authentication &gt; Password) değiştirmeniz gerekir.
+          </p>
         </div>
       </div>
 
