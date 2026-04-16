@@ -97,7 +97,7 @@ export default async function StockListPage({
             <table className="w-full min-w-[800px]">
               <thead>
                 <tr className="border-b border-slate-800">
-                  <th className="text-left text-xs font-semibold text-slate-500 uppercase tracking-wider px-6 py-3 whitespace-nowrap">{t("productName")}</th>
+                  <th className="sticky left-0 z-20 bg-slate-900 border-r border-slate-800 shadow-[4px_0_12px_-4px_rgba(0,0,0,0.3)] text-left text-xs font-semibold text-slate-500 uppercase tracking-wider px-6 py-3 whitespace-nowrap">{t("productName")}</th>
                   <th className="text-left text-xs font-semibold text-slate-500 uppercase tracking-wider px-6 py-3 whitespace-nowrap">{t("sku")}</th>
                   <th className="text-right text-xs font-semibold text-slate-500 uppercase tracking-wider px-6 py-3 whitespace-nowrap">{t("productStatus")}</th>
                   {canSeePrices && (
@@ -124,8 +124,8 @@ export default async function StockListPage({
                       : { label: t("sufficient"), color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20" };
 
                   return (
-                    <tr key={urun.id} className={`transition-colors hover:bg-slate-800/30`}>
-                      <td className="px-6 py-4">
+                    <tr key={urun.id} className="group transition-colors hover:bg-slate-800/30">
+                      <td className="sticky left-0 z-10 bg-slate-900 border-r border-slate-800 shadow-[4px_0_12px_-4px_rgba(0,0,0,0.3)] transition-all group-hover:bg-slate-800/80 px-6 py-4">
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 rounded-lg bg-slate-700 flex items-center justify-center text-white font-bold text-xs uppercase">{urun.name.charAt(0)}</div>
                           <div className="text-sm font-medium text-white">{urun.name}</div>

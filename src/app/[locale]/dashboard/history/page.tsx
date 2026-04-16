@@ -180,18 +180,22 @@ export default async function HistoryPage({
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-slate-800 bg-slate-800/20">
-                    <th className="text-left text-[10px] font-bold text-slate-500 uppercase tracking-widest px-6 py-4">{tDashboard("statusLabel")}</th>
-                    <th className="text-left text-[10px] font-bold text-slate-500 uppercase tracking-widest px-6 py-4">Ürün & Bilgi</th>
-                    <th className="text-left text-[10px] font-bold text-slate-500 uppercase tracking-widest px-6 py-4">İşlemi Yapan</th>
-                    <th className="text-right text-[10px] font-bold text-slate-500 uppercase tracking-widest px-6 py-4">Miktar</th>
+                    <th className="sticky left-0 z-20 bg-slate-900 border-r border-slate-800 shadow-[4px_0_12px_-4px_rgba(0,0,0,0.3)] text-left text-[10px] font-bold text-slate-500 uppercase tracking-widest px-6 py-4 whitespace-nowrap">Ürün & Bilgi</th>
+                    <th className="text-left text-[10px] font-bold text-slate-500 uppercase tracking-widest px-6 py-4 whitespace-nowrap">{tDashboard("statusLabel")}</th>
+                    <th className="text-left text-[10px] font-bold text-slate-500 uppercase tracking-widest px-6 py-4 whitespace-nowrap">İşlemi Yapan</th>
+                    <th className="text-right text-[10px] font-bold text-slate-500 uppercase tracking-widest px-6 py-4 whitespace-nowrap">Miktar</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/60">
                   {hareketler.map((h) => (
                     <tr key={h.id} className="hover:bg-slate-800/30 transition-colors group">
-                      <td className="px-6 py-4">
+                      <td className="sticky left-0 z-10 bg-slate-900 border-r border-slate-800 shadow-[4px_0_12px_-4px_rgba(0,0,0,0.3)] transition-all group-hover:bg-slate-800/80 px-6 py-4 min-w-[200px]">
+                        <p className="text-white text-sm font-bold truncate max-w-[180px]">{h.productName}</p>
+                        <p className="text-slate-500 text-[10px] italic truncate max-w-[180px]">{h.description}</p>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center gap-3">
-                          <div className={`w-2 h-10 rounded-full ${h.type === "in" ? "bg-emerald-500/50" : "bg-red-500/50"}`} />
+                          <div className={`w-2 h-10 rounded-full flex-shrink-0 ${h.type === "in" ? "bg-emerald-500/50" : "bg-red-500/50"}`} />
                           <div>
                             <p className="text-white text-xs font-bold tabular-nums">
                               {new Date(h.createdAt).toLocaleDateString("tr-TR")}
@@ -202,11 +206,7 @@ export default async function HistoryPage({
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4">
-                        <p className="text-white text-sm font-bold">{h.productName}</p>
-                        <p className="text-slate-500 text-[10px] italic">{h.description}</p>
-                      </td>
-                      <td className="px-6 py-4">
+                      <td className="px-6 py-4 whitespace-nowrap">
                         <p className="text-slate-400 text-xs font-medium">{getDisplayName(h.userEmail)}</p>
                       </td>
                       <td className="px-6 py-4 text-right">
