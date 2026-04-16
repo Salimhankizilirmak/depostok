@@ -161,5 +161,26 @@
     "monthlyOut": "Çıkış",
     "comparison": "Ürün Fiyat Karşılaştırması (TL)",
     "noData": "Bu dönem için veri bulunamadı."
+  },
+  "History": {
+    "title": "Gelişmiş Denetim Paneli",
+    "advancedFilters": "Gelişmiş Filtreler",
+    "dateRange": "Tarih Aralığı",
+    "dateFrom": "Başlangıç",
+    "dateTo": "Bitiş",
+    "selectProducts": "Çoklu Ürün Seçiniz",
+    "movementType": "İşlem Tipi",
+    "allTypes": "Tüm İşlemler",
+    "in": "Stok Girişi",
+    "out": "Stok Çıkışı",
+    "production": "Üretim İşlemleri",
+    "viewMode": "Görünüm Seç",
+    "listView": "Liste Görünümü",
+    "calendarView": "Takvim Görünümü",
+    "calendar": "Takvim",
+    "totalIn": "Toplam Giriş",
+    "totalOut": "Toplam Çıkış",
+    "filter": "Filtrele",
+    "reset": "Sıfırla"
   }
 }

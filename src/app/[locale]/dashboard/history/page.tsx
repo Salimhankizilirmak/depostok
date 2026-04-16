@@ -1,27 +1,56 @@
 import { currentUser, clerkClient } from "@clerk/nextjs/server";
 import { db } from "@/db";
 import { stockMovements, products } from "@/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and, gte, lte, inArray, like } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import ExportExcelButton from "@/components/ExportExcelButton";
+import HistoryFilters from "@/components/HistoryFilters";
+import HistoryCalendar from "@/components/HistoryCalendar";
+import { getTranslations } from "next-intl/server";
 
 export const dynamic = "force-dynamic";
 
 import { getCompanyAndRole } from "@/lib/auth-repair";
 
-export default async function HistoryPage() {
+export default async function HistoryPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
   const user = await currentUser();
   const email = user?.emailAddresses?.[0]?.emailAddress ?? null;
   if (!email) redirect("/");
 
   const firma = await getCompanyAndRole(email);
-
   if (!firma) redirect("/");
 
-  // stock_movements + products JOIN
+  // Parametreleri çöz
+  const params = await searchParams;
+  const dateFrom = params.dateFrom as string;
+  const dateTo = params.dateTo as string;
+  const productIds = (params.productIds as string)?.split(",").filter(Boolean);
+  const type = params.type as string;
+  const view = params.view as string || "list";
+
+  // Dinamik Filtreleri İnşa Et
+  const filters = [eq(stockMovements.companyId, firma.id)];
+  
+  if (dateFrom) filters.push(gte(stockMovements.createdAt, `${dateFrom} 00:00:00`));
+  if (dateTo) filters.push(lte(stockMovements.createdAt, `${dateTo} 23:59:59`));
+  if (productIds && productIds.length > 0) filters.push(inArray(stockMovements.productId, productIds));
+  
+  if (type === "in") filters.push(eq(stockMovements.type, "in"));
+  else if (type === "out") filters.push(eq(stockMovements.type, "out"));
+  else if (type === "production") filters.push(like(stockMovements.description, "Üretim%"));
+
+  const tDashboard = await getTranslations("Dashboard");
+  const tHistory = await getTranslations("History");
+
+  // Veri Çekme
   const hareketler = await db
     .select({
       id: stockMovements.id,
+      productId: stockMovements.productId,
       type: stockMovements.type,
       quantity: stockMovements.quantity,
       createdAt: stockMovements.createdAt,
@@ -32,8 +61,10 @@ export default async function HistoryPage() {
     })
     .from(stockMovements)
     .innerJoin(products, eq(stockMovements.productId, products.id))
-    .where(eq(stockMovements.companyId, firma.id))
+    .where(and(...filters))
     .orderBy(desc(stockMovements.createdAt));
+
+  const allProducts = await db.select({ id: products.id, name: products.name, sku: products.sku }).from(products).where(eq(products.companyId, firma.id));
 
   // Clerk'ten kullanıcı bilgilerini çekip eşleştirme yap
   const uniqueEmails = Array.from(new Set(hareketler.map(h => h.userEmail).filter(Boolean))) as string[];
@@ -66,51 +97,18 @@ export default async function HistoryPage() {
     .reduce((a, h) => a + h.quantity, 0);
 
   return (
-    <div className="space-y-8">
-      {/* Başlık */}
-      <div className="flex items-start justify-between">
+    <div className="space-y-6">
+      {/* Başlık ve Excel */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">
-            Stok Hareket Geçmişi
+          <h1 className="text-3xl font-black text-white tracking-tighter uppercase italic bg-gradient-to-r from-white to-slate-500 bg-clip-text text-transparent">
+            {tHistory("title")}
           </h1>
-          <p className="text-slate-400 text-sm mt-1">
-            {firma.name} firmasına ait tüm stok giriş ve çıkış hareketleri.
+          <p className="text-slate-500 text-xs font-medium tracking-widest uppercase mt-1">
+            {firma.name} / AUDIT & CONTROL CENTER
           </p>
         </div>
-
-        {/* Özet */}
-        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-          <div className="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-center min-w-[100px]">
-            <p className="text-xl sm:text-2xl font-bold text-emerald-400 tabular-nums">
-              +{toplamGiris}
-            </p>
-            <p className="text-slate-500 text-[10px] sm:text-xs mt-0.5">Toplam Giriş</p>
-          </div>
-          <div className="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-center min-w-[100px]">
-            <p className="text-xl sm:text-2xl font-bold text-red-400 tabular-nums">
-              -{toplamCikis}
-            </p>
-            <p className="text-slate-500 text-[10px] sm:text-xs mt-0.5">Toplam Çıkış</p>
-          </div>
-          <div className="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-center min-w-[100px]">
-            <p className="text-xl sm:text-2xl font-bold text-white tabular-nums">
-              {hareketler.length}
-            </p>
-            <p className="text-slate-500 text-[10px] sm:text-xs mt-0.5">İşlem</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Tablo */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl shadow-xl shadow-black/30 overflow-hidden">
-        <div className="px-6 py-4 border-b border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 w-full">
-          <div className="flex items-center gap-2">
-            <h2 className="text-white font-semibold text-sm">Tüm Hareketler</h2>
-            <span className="text-xs text-slate-500">
-              {hareketler.length} hareket
-            </span>
-          </div>
-          <ExportExcelButton
+        <ExportExcelButton
             data={hareketler.map((h) => ({
               Tarih: new Date(h.createdAt).toLocaleString("tr-TR"),
               Ürün: h.productName,
@@ -120,152 +118,109 @@ export default async function HistoryPage() {
               Açıklama: h.description,
               "İşlemi Yapan": getDisplayName(h.userEmail),
             }))}
-            fileName={`${firma.name}_Hareket_Gecmisi_${new Date().toLocaleDateString("tr-TR")}`}
+            fileName={`${firma.name}_Denetim_Raporu_${new Date().toLocaleDateString("tr-TR")}`}
           />
-        </div>
-
-        {hareketler.length === 0 ? (
-          <div className="py-20 flex flex-col items-center justify-center text-center">
-            <div className="w-14 h-14 rounded-2xl bg-slate-800 flex items-center justify-center mb-4">
-              <svg
-                width="26"
-                height="26"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#475569"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-              </svg>
-            </div>
-            <p className="text-slate-400 text-sm font-medium">
-              Henüz stok hareketi yok
-            </p>
-            <p className="text-slate-600 text-xs mt-1">
-              Ürünler sayfasından stok girişi veya çıkışı yapabilirsin.
-            </p>
-          </div>
-        ) : (
-          <div className="w-full overflow-x-auto">
-            <div className="min-w-[800px]">
-              <table className="w-full min-w-[800px]">
-              <thead>
-                <tr className="border-b border-slate-800">
-                  <th className="text-left text-xs font-semibold text-slate-500 uppercase tracking-wider px-6 py-3 whitespace-nowrap">
-                    Tarih
-                  </th>
-                  <th className="text-left text-xs font-semibold text-slate-500 uppercase tracking-wider px-6 py-3 whitespace-nowrap">
-                    Ürün
-                  </th>
-                  <th className="text-center text-xs font-semibold text-slate-500 uppercase tracking-wider px-6 py-3 whitespace-nowrap">
-                    İşlem Tipi
-                  </th>
-                  <th className="text-left text-xs font-semibold text-slate-500 uppercase tracking-wider px-6 py-3 whitespace-nowrap">
-                    Açıklama
-                  </th>
-                  <th className="text-left text-xs font-semibold text-slate-500 uppercase tracking-wider px-6 py-3 whitespace-nowrap">
-                    İşlemi Yapan
-                  </th>
-                  <th className="text-right text-xs font-semibold text-slate-500 uppercase tracking-wider px-6 py-3 whitespace-nowrap">
-                    Miktar
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-800/60">
-                {hareketler.map((h) => (
-                  <tr
-                    key={h.id}
-                    className="hover:bg-slate-800/30 transition-colors"
-                  >
-                    {/* Tarih */}
-                    <td className="px-6 py-4">
-                      <p className="text-white text-sm tabular-nums">
-                        {new Date(h.createdAt).toLocaleDateString("tr-TR", {
-                          day: "2-digit",
-                          month: "short",
-                          year: "numeric",
-                        })}
-                      </p>
-                      <p className="text-slate-500 text-xs tabular-nums mt-0.5">
-                        {new Date(h.createdAt).toLocaleTimeString("tr-TR", {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </p>
-                    </td>
-
-                    {/* Ürün */}
-                    <td className="px-6 py-4">
-                      <p className="text-white text-sm font-medium">
-                        {h.productName}
-                      </p>
-                      {h.productSku && (
-                        <span className="font-mono text-xs text-slate-500">
-                          {h.productSku}
-                        </span>
-                      )}
-                    </td>
-
-                    {/* Tip Badge */}
-                    <td className="px-6 py-4 text-center">
-                      {h.type === "in" ? (
-                        <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-3 py-1">
-                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                            <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-                          </svg>
-                          Giriş
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-red-400 bg-red-500/10 border border-red-500/20 rounded-full px-3 py-1">
-                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                            <line x1="5" y1="12" x2="19" y2="12" />
-                          </svg>
-                          Çıkış
-                        </span>
-                      )}
-                    </td>
-
-                  {/* Açıklama */}
-                  <td className="px-6 py-4">
-                    <p className="text-slate-300 text-sm italic">
-                      {h.description}
-                    </p>
-                  </td>
-
-                  {/* İşlemi Yapan */}
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full bg-slate-800 flex items-center justify-center text-[10px] text-slate-400 font-bold border border-slate-700">
-                        {h.userEmail ? h.userEmail.substring(0, 1).toUpperCase() : "?"}
-                      </div>
-                      <p className="text-slate-400 text-xs">
-                        {getDisplayName(h.userEmail)}
-                      </p>
-                    </div>
-                  </td>
-
-                    {/* Miktar */}
-                    <td className="px-6 py-4 text-right">
-                      <span
-                        className={`text-xl font-bold tabular-nums ${
-                          h.type === "in" ? "text-emerald-400" : "text-red-400"
-                        }`}
-                      >
-                        {h.type === "in" ? "+" : "-"}
-                        {h.quantity}
-                      </span>
-                      <span className="text-slate-500 text-xs ml-1">adet</span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-        )}
       </div>
+
+      {/* Gelişmiş Filtreler */}
+      <HistoryFilters products={allProducts} />
+
+      {/* Özet Kartları */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl shadow-black/20">
+            <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-1">{tHistory("totalIn")}</p>
+            <p className="text-2xl font-black text-emerald-400 tabular-nums">+{toplamGiris}</p>
+          </div>
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl shadow-black/20">
+            <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-1">{tHistory("totalOut")}</p>
+            <p className="text-2xl font-black text-red-400 tabular-nums">-{toplamCikis}</p>
+          </div>
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl shadow-black/20">
+            <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-1">Filtrelenmiş İşlem</p>
+            <p className="text-2xl font-black text-white tabular-nums">{hareketler.length}</p>
+          </div>
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl shadow-black/20">
+            <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-1">Aktif Filtre</p>
+            <p className="text-2xl font-black text-violet-400 tabular-nums">
+              {filters.length - 1} {/* FirmaID filtresini sayma */}
+            </p>
+          </div>
+      </div>
+
+      {/* Görünüm Sekmeleri */}
+      <div className="flex items-center gap-1 bg-slate-900/50 p-1 rounded-2xl border border-slate-800 w-fit">
+        <a 
+          href={`?${new URLSearchParams({...Object.fromEntries(Object.entries(params).filter(([_,v])=>v!==undefined) as [string, string][]), view: "list"}).toString()}`}
+          className={`px-6 py-2 rounded-xl text-xs font-bold transition-all ${view === "list" ? "bg-violet-600 text-white shadow-lg shadow-violet-600/20" : "text-slate-500 hover:text-slate-300"}`}
+        >
+          {tHistory("listView")}
+        </a>
+        <a 
+           href={`?${new URLSearchParams({...Object.fromEntries(Object.entries(params).filter(([_,v])=>v!==undefined) as [string, string][]), view: "calendar"}).toString()}`}
+          className={`px-6 py-2 rounded-xl text-xs font-bold transition-all ${view === "calendar" ? "bg-violet-600 text-white shadow-lg shadow-violet-600/20" : "text-slate-500 hover:text-slate-300"}`}
+        >
+          {tHistory("calendarView")}
+        </a>
+      </div>
+
+      {/* Ana İçerik */}
+      {view === "calendar" ? (
+        <HistoryCalendar data={hareketler} />
+      ) : (
+        <div className="bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl overflow-hidden">
+          {hareketler.length === 0 ? (
+            <div className="py-20 flex flex-col items-center justify-center text-center">
+              <p className="text-slate-400 text-sm font-medium">Sonuç bulunamadı</p>
+              <p className="text-slate-600 text-xs mt-1">Filtreleri değiştirmeyi deneyebilirsin.</p>
+            </div>
+          ) : (
+            <div className="w-full overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-slate-800 bg-slate-800/20">
+                    <th className="text-left text-[10px] font-bold text-slate-500 uppercase tracking-widest px-6 py-4">{tDashboard("statusLabel")}</th>
+                    <th className="text-left text-[10px] font-bold text-slate-500 uppercase tracking-widest px-6 py-4">Ürün & Bilgi</th>
+                    <th className="text-left text-[10px] font-bold text-slate-500 uppercase tracking-widest px-6 py-4">İşlemi Yapan</th>
+                    <th className="text-right text-[10px] font-bold text-slate-500 uppercase tracking-widest px-6 py-4">Miktar</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-800/60">
+                  {hareketler.map((h) => (
+                    <tr key={h.id} className="hover:bg-slate-800/30 transition-colors group">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-2 h-10 rounded-full ${h.type === "in" ? "bg-emerald-500/50" : "bg-red-500/50"}`} />
+                          <div>
+                            <p className="text-white text-xs font-bold tabular-nums">
+                              {new Date(h.createdAt).toLocaleDateString("tr-TR")}
+                            </p>
+                            <p className="text-slate-500 text-[10px] tabular-nums">
+                              {new Date(h.createdAt).toLocaleTimeString("tr-TR", { hour: '2-digit', minute: '2-digit' })}
+                            </p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <p className="text-white text-sm font-bold">{h.productName}</p>
+                        <p className="text-slate-500 text-[10px] italic">{h.description}</p>
+                      </td>
+                      <td className="px-6 py-4">
+                        <p className="text-slate-400 text-xs font-medium">{getDisplayName(h.userEmail)}</p>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <span className={`text-lg font-black tabular-nums ${h.type === "in" ? "text-emerald-400" : "text-red-400"}`}>
+                          {h.type === "in" ? "+" : "-"}{h.quantity}
+                        </span>
+                        <span className="text-slate-600 text-[10px] ml-1 uppercase font-bold">adet</span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
