@@ -59,7 +59,7 @@ export default function IdentityBinder() {
             <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
           </svg>
           <p className="text-[11px] text-amber-200/80 leading-relaxed">
-            <strong>Önemli:</strong> Clerk varsayılan olarak en az 8 karakter şifre ister. Eğer &quot;123&quot; gibi kısa şifreler kullanmak istiyorsanız, Clerk panelinizden şifre politikasını (Authentication &gt; Password) değiştirmeniz gerekir.
+            LeadNova Yazılım güvenliğiniz için varsayılan olarak en az 8 karakter şifre ister.
           </p>
         </div>
       </div>
