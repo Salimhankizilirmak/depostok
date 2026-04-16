@@ -25,6 +25,7 @@ export default function HistoryFilters({ products }: HistoryFiltersProps) {
   const [selectedProductIds, setSelectedProductIds] = useState<string[]>(
     searchParams.get("productIds")?.split(",").filter(Boolean) || []
   );
+  const [searchResults, setSearchResults] = useState<Product[]>([]);
 
   const handleFilter = () => {
     const params = new URLSearchParams(searchParams.toString());
@@ -92,47 +93,68 @@ export default function HistoryFilters({ products }: HistoryFiltersProps) {
           </select>
         </div>
 
-        {/* Ürün Seçimi (Multi-select list) */}
-        <div className="space-y-2">
+        {/* Ürün Seçimi (Search-based Multi-select) */}
+        <div className="space-y-2 lg:col-span-1 relative">
           <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-1">
             {t("selectProducts")}
           </label>
-          <div className="relative group">
-            <div className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-400 min-h-[38px] cursor-pointer flex flex-wrap gap-1">
-              {selectedProductIds.length === 0 ? t("filterAll") : (
-                selectedProductIds.map(id => {
-                  const p = products.find(prod => prod.id === id);
-                  return (
-                    <span key={id} className="bg-violet-600/20 text-violet-400 px-1.5 py-0.5 rounded text-[10px] font-bold flex items-center gap-1 border border-violet-500/20">
-                      {p?.sku || p?.name.substring(0, 8)}
-                      <button onClick={(e) => { e.stopPropagation(); toggleProduct(id); }} className="hover:text-white">&times;</button>
-                    </span>
-                  );
-                })
-              )}
-            </div>
-            
-            <div className="absolute top-full left-0 w-full mt-2 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl z-50 max-h-[200px] overflow-y-auto hidden group-hover:block hover:block p-2 scrollbar-thin scrollbar-thumb-slate-700">
-              {products.map(p => (
-                <div 
-                  key={p.id}
-                  onClick={() => toggleProduct(p.id)}
-                  className={`flex items-center justify-between p-2 rounded-lg cursor-pointer transition-all ${
-                    selectedProductIds.includes(p.id) ? "bg-violet-600/20 text-white" : "hover:bg-slate-800 text-slate-400"
-                  }`}
-                >
-                  <div className="flex flex-col">
-                    <span className="text-[11px] font-bold">{p.name}</span>
-                    <span className="text-[9px] text-slate-500">{p.sku}</span>
+          <div className="relative">
+            <input 
+              type="text"
+              placeholder={t("searchPlaceholder")}
+              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-xs text-white outline-none focus:border-violet-500 transition-all"
+              onChange={(e) => {
+                const term = e.target.value.toLowerCase();
+                const results = term ? products.filter(p => 
+                  p.name.toLowerCase().includes(term) || 
+                  p.sku?.toLowerCase().includes(term)
+                ) : [];
+                setSearchResults(results);
+              }}
+            />
+            {searchResults.length > 0 && (
+              <div className="absolute top-full left-0 w-full mt-2 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl z-[60] max-h-[250px] overflow-y-auto p-2 scrollbar-thin scrollbar-thumb-slate-700">
+                {searchResults.map(p => (
+                  <div 
+                    key={p.id}
+                    onClick={() => {
+                      if (!selectedProductIds.includes(p.id)) {
+                        setSelectedProductIds([...selectedProductIds, p.id]);
+                      }
+                      setSearchResults([]);
+                      (document.querySelector('input[placeholder="' + t("searchPlaceholder") + '"]') as HTMLInputElement).value = "";
+                    }}
+                    className="flex items-center justify-between p-2 rounded-lg cursor-pointer hover:bg-slate-800 text-slate-400 transition-all group"
+                  >
+                    <div className="flex flex-col">
+                      <span className="text-[11px] font-bold group-hover:text-white transition-colors">{p.name}</span>
+                      <span className="text-[9px] text-slate-500">{p.sku}</span>
+                    </div>
+                    {selectedProductIds.includes(p.id) && (
+                      <span className="text-[10px] text-violet-400 font-bold uppercase tracking-widest">Seçili</span>
+                    )}
                   </div>
-                  {selectedProductIds.includes(p.id) && (
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="20 6 9 17 4 12" />
-                    </svg>
-                  )}
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
+          </div>
+          
+          {/* Seçili Ürünler Chips */}
+          <div className="flex flex-wrap gap-2 mt-2">
+            {selectedProductIds.map(id => {
+              const p = products.find(prod => prod.id === id);
+              return (
+                <span key={id} className="bg-violet-600/10 text-violet-400 px-2 py-1 rounded-lg text-[10px] font-bold flex items-center gap-2 border border-violet-500/20 group animate-in zoom-in-95">
+                  {p?.sku || p?.name.substring(0, 15)}
+                  <button 
+                    onClick={() => toggleProduct(id)} 
+                    className="hover:text-white bg-violet-600/20 rounded-full w-4 h-4 flex items-center justify-center transition-all"
+                  >
+                    &times;
+                  </button>
+                </span>
+              );
+            })}
           </div>
         </div>
 
