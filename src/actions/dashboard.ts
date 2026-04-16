@@ -8,6 +8,18 @@ import { revalidatePath } from "next/cache";
 import { sendMail } from "@/lib/mail";
 
 export async function addProduct(companyId: string, formData: FormData) {
+  const user = await currentUser();
+  const email = user?.emailAddresses?.[0]?.emailAddress;
+  if (!email) throw new Error("Oturum açılmadı.");
+
+  const { getCompanyAndRole } = await import("@/lib/auth-repair");
+  const firma = await getCompanyAndRole(email);
+  const allowedRoles = ["Yönetici", "Super Admin", "Yetkili", "Mühendis"];
+  
+  if (!firma || firma.id !== companyId || !allowedRoles.includes(firma.userRole)) {
+    throw new Error("Bu işlemi yapmaya yetkiniz yok.");
+  }
+
   const name = formData.get("name") as string;
   const sku = formData.get("sku") as string;
   const currentStock = parseInt(formData.get("current_stock") as string) || 0;
@@ -15,7 +27,7 @@ export async function addProduct(companyId: string, formData: FormData) {
   const criticalThreshold = parseInt(formData.get("critical_threshold") as string) || 10;
   const location = formData.get("location") as string;
   const attributes = formData.get("attributes") as string;
-  const unit = formData.get("unit") as string || "Adet";
+  const unit = (formData.get("unit") as string) || "Adet";
 
   if (!name) {
     throw new Error("Ürün adı zorunludur.");
@@ -49,6 +61,13 @@ export async function updateStock(
   const user = await currentUser();
   const userEmail = user?.emailAddresses?.[0]?.emailAddress || "system";
 
+  // Güvenlik kontrolü: Kullanıcı bu firmaya ait mi?
+  const { getCompanyAndRole } = await import("@/lib/auth-repair");
+  const belongsToCompany = await getCompanyAndRole(userEmail);
+  if (!belongsToCompany || belongsToCompany.id !== companyId) {
+    throw new Error("Bu işlem için yetkiniz yok.");
+  }
+
   // 1) Hareketi kaydet
   await db.insert(stockMovements).values({
     productId,
@@ -60,32 +79,42 @@ export async function updateStock(
   });
 
   // 2) Ürün stok miktarını güncelle
-  const [firma] = await db.select().from(companies).where(eq(companies.id, companyId)).limit(1);
+  const [firma] = await db
+    .select()
+    .from(companies)
+    .where(eq(companies.id, companyId))
+    .limit(1);
 
   if (type === "out" && firma?.bomSystemEnabled) {
-    const components = await db.select().from(productTrees).where(eq(productTrees.parentProductId, productId));
+    const components = await db
+      .select()
+      .from(productTrees)
+      .where(eq(productTrees.parentProductId, productId));
     if (components.length > 0) {
-      await Promise.all(components.map(async (comp: { childProductId: string, quantity: number }) => {
-        const deduction = quantity * comp.quantity;
-        
-        // Bileşen stok düşüşü
-        await db.update(products)
-          .set({ currentStock: sql`${products.currentStock} - ${deduction}` })
-          .where(eq(products.id, comp.childProductId));
+      await Promise.all(
+        components.map(async (comp: { childProductId: string; quantity: number }) => {
+          const deduction = quantity * comp.quantity;
 
-        // Bileşen hareketi kaydet
-        await db.insert(stockMovements).values({
-          productId: comp.childProductId,
-          companyId,
-          type: "out",
-          quantity: deduction,
-          description: `BOM Montaj Çıkışı (${description})`,
-          userEmail,
-        });
+          // Bileşen stok düşüşü
+          await db
+            .update(products)
+            .set({ currentStock: sql`${products.currentStock} - ${deduction}` })
+            .where(eq(products.id, comp.childProductId));
 
-        // Bileşen için kritik stok kontrolü (Opsiyonel ama iyi olur)
-        await checkAndNotifyCriticalStock(comp.childProductId);
-      }));
+          // Bileşen hareketi kaydet
+          await db.insert(stockMovements).values({
+            productId: comp.childProductId,
+            companyId,
+            type: "out",
+            quantity: deduction,
+            description: `BOM Montaj Çıkışı (${description})`,
+            userEmail,
+          });
+
+          // Bileşen için kritik stok kontrolü
+          await checkAndNotifyCriticalStock(comp.childProductId);
+        })
+      );
       revalidatePath("/dashboard");
       return; // Ana üründen düşme
     }
@@ -110,9 +139,31 @@ export async function updateStock(
   revalidatePath("/dashboard/history");
 }
 
-export async function importProducts(companyId: string, productsArray: { name: string, sku?: string, currentStock?: number, price?: number, criticalThreshold?: number, location?: string, attributes?: any, unit?: string }[]) {
+export async function importProducts(
+  companyId: string,
+  productsArray: {
+    name: string;
+    sku?: string;
+    currentStock?: number;
+    price?: number;
+    criticalThreshold?: number;
+    location?: string;
+    attributes?: any;
+    unit?: string;
+  }[]
+) {
   const user = await currentUser();
-  if (!user) throw new Error("Oturum açılmadı.");
+  const email = user?.emailAddresses?.[0]?.emailAddress;
+  if (!email) throw new Error("Oturum açılmadı.");
+
+  // Role kontrolü
+  const { getCompanyAndRole } = await import("@/lib/auth-repair");
+  const firma = await getCompanyAndRole(email);
+  const allowedRoles = ["Yönetici", "Super Admin", "Yetkili", "Mühendis"];
+
+  if (!firma || firma.id !== companyId || !allowedRoles.includes(firma.userRole)) {
+    throw new Error("Bu işlemi yapmaya yetkiniz yok.");
+  }
 
   // Dizi boşsa çık
   if (productsArray.length === 0) return { success: true, count: 0 };
@@ -133,7 +184,7 @@ export async function importProducts(companyId: string, productsArray: { name: s
     importBatchId: batchId,
   }));
 
-  // Chunking (toplu ekleme sınırı varsa diye, ama burada direkt ekliyoruz)
+  // Chunking
   await db
     .insert(products)
     .values(values)

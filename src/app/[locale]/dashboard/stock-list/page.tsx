@@ -71,15 +71,17 @@ export default async function StockListPage({
           <h1 className="text-2xl font-bold text-white mb-1">Stok Listesi</h1>
           <p className="text-slate-400 text-sm">Deponuzdaki tüm ürünlerin güncel miktar ve konum raporu.</p>
         </div>
-        <ExportExcelButton
-          data={urunler.map((u) => ({
-            [t("productName")]: u.name,
-            [t("sku")]: u.sku || "—",
-            "Mevcut Stok": u.currentStock,
-            ...(firma.locationSystemEnabled ? { [t("shelfLocation")]: u.location || "—" } : {}),
-          }))}
-          fileName={`${firma.name}_Stok_Listesi`}
-        />
+        {["Yönetici", "Super Admin", "Yetkili", "Mühendis"].includes(firma.userRole) && (
+          <ExportExcelButton
+            data={urunler.map((u) => ({
+              [t("productName")]: u.name,
+              [t("sku")]: u.sku || "—",
+              "Mevcut Stok": u.currentStock,
+              ...(firma.locationSystemEnabled ? { [t("shelfLocation")]: u.location || "—" } : {}),
+            }))}
+            fileName={`${firma.name}_Stok_Listesi`}
+          />
+        )}
       </div>
 
       <DashboardSearch />

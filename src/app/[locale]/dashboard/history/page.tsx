@@ -108,18 +108,20 @@ export default async function HistoryPage({
             {firma.name} / AUDIT & CONTROL CENTER
           </p>
         </div>
-        <ExportExcelButton
-            data={hareketler.map((h) => ({
-              Tarih: new Date(h.createdAt).toLocaleString("tr-TR"),
-              Ürün: h.productName,
-              SKU: h.productSku || "—",
-              Tip: h.type === "in" ? "Giriş" : "Çıkış",
-              Miktar: h.quantity,
-              Açıklama: h.description,
-              "İşlemi Yapan": getDisplayName(h.userEmail),
-            }))}
-            fileName={`${firma.name}_Denetim_Raporu_${new Date().toLocaleDateString("tr-TR")}`}
-          />
+        {["Yönetici", "Super Admin", "Yetkili", "Mühendis"].includes(firma.userRole) && (
+          <ExportExcelButton
+              data={hareketler.map((h) => ({
+                Tarih: new Date(h.createdAt).toLocaleString("tr-TR"),
+                Ürün: h.productName,
+                SKU: h.productSku || "—",
+                Tip: h.type === "in" ? "Giriş" : "Çıkış",
+                Miktar: h.quantity,
+                Açıklama: h.description,
+                "İşlemi Yapan": getDisplayName(h.userEmail),
+              }))}
+              fileName={`${firma.name}_Denetim_Raporu_${new Date().toLocaleDateString("tr-TR")}`}
+            />
+        )}
       </div>
 
       {/* Gelişmiş Filtreler */}

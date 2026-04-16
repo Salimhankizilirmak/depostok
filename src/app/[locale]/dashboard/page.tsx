@@ -40,6 +40,8 @@ export default async function DashboardPage({
 
   // RBAC yetkileri
   const canSeePrices = firma.userRole === "Yönetici" || firma.userRole === "Yetkili";
+  const canManageProducts = ["Yönetici", "Super Admin", "Yetkili", "Mühendis"].includes(firma.userRole);
+  const canExport = canManageProducts;
 
   // Sorgu Koşulları
   const conditions = [eq(products.companyId, firma.id)];
@@ -201,73 +203,75 @@ export default async function DashboardPage({
       </div>
 
       {/* ─── Yeni Ürün Ekleme Formu ─── */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl shadow-black/30">
-        <div className="flex items-center gap-2 mb-6">
-          <div className="w-7 h-7 rounded-lg bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#34d399" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-            </svg>
+      {canManageProducts && (
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl shadow-black/30">
+          <div className="flex items-center gap-2 mb-6">
+            <div className="w-7 h-7 rounded-lg bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#34d399" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+            </div>
+            <h2 className="text-white font-semibold text-sm">{t("addProduct")}</h2>
           </div>
-          <h2 className="text-white font-semibold text-sm">{t("addProduct")}</h2>
-        </div>
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-6">
-          <p className="text-slate-400 text-xs">
-            {t("addProductDesc") || "Hızlıca yeni bir ürün ekleyebilir veya Excel listesi yükleyebilirsiniz."}
-          </p>
-          <ImportExcelButton companyId={firma.id} />
-        </div>
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-6">
+            <p className="text-slate-400 text-xs">
+              {t("addProductDesc") || "Hızlıca yeni bir ürün ekleyebilir veya Excel listesi yükleyebilirsiniz."}
+            </p>
+            <ImportExcelButton companyId={firma.id} />
+          </div>
 
-        <form action={addProductWithId}>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div>
-              <label htmlFor="product-name" className="block text-xs font-medium text-slate-400 mb-1.5">
-                {t("productName")} <span className="text-red-400">*</span>
-              </label>
-              <input id="product-name" name="name" type="text" required placeholder="..." className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all" />
-            </div>
-            <div>
-              <label htmlFor="product-sku" className="block text-xs font-medium text-slate-400 mb-1.5">{t("sku")}</label>
-              <input id="product-sku" name="sku" type="text" placeholder="..." className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all" />
-            </div>
-            <div>
-              <label htmlFor="product-stock" className="block text-xs font-medium text-slate-400 mb-1.5">{t("initialStock")}</label>
-              <input id="product-stock" name="current_stock" type="number" min="0" defaultValue="0" className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all" />
-            </div>
-            <div>
-              <label htmlFor="product-price" className="block text-xs font-medium text-slate-400 mb-1.5">{t("unitPrice")}</label>
-              <input id="product-price" name="price" type="number" step="0.01" min="0" defaultValue="0" className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all" />
-            </div>
-            <div>
-              <label htmlFor="product-unit" className="block text-xs font-medium text-slate-400 mb-1.5">{t("unit")}</label>
-              <select id="product-unit" name="unit" defaultValue="Adet" className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all cursor-pointer">
-                <option value="Adet">Adet</option>
-                <option value="kg">kg</option>
-                <option value="metre">Metre</option>
-                <option value="paket">Paket</option>
-                <option value="litre">Litre</option>
-              </select>
-            </div>
-            <div>
-              <label htmlFor="product-threshold" className="block text-xs font-medium text-slate-400 mb-1.5">{t("criticalLevel")}</label>
-              <input id="product-threshold" name="critical_threshold" type="number" min="0" defaultValue="10" className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all" />
-            </div>
-            {firma.locationSystemEnabled && (
+          <form action={addProductWithId}>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
-                <label htmlFor="product-location" className="block text-xs font-medium text-slate-400 mb-1.5">{t("shelfLocation")}</label>
-                <input id="product-location" name="location" type="text" placeholder="..." className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all" />
+                <label htmlFor="product-name" className="block text-xs font-medium text-slate-400 mb-1.5">
+                  {t("productName")} <span className="text-red-400">*</span>
+                </label>
+                <input id="product-name" name="name" type="text" required placeholder="..." className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all" />
               </div>
-            )}
-          </div>
+              <div>
+                <label htmlFor="product-sku" className="block text-xs font-medium text-slate-400 mb-1.5">{t("sku")}</label>
+                <input id="product-sku" name="sku" type="text" placeholder="..." className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all" />
+              </div>
+              <div>
+                <label htmlFor="product-stock" className="block text-xs font-medium text-slate-400 mb-1.5">{t("initialStock")}</label>
+                <input id="product-stock" name="current_stock" type="number" min="0" defaultValue="0" className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all" />
+              </div>
+              <div>
+                <label htmlFor="product-price" className="block text-xs font-medium text-slate-400 mb-1.5">{t("unitPrice")}</label>
+                <input id="product-price" name="price" type="number" step="0.01" min="0" defaultValue="0" className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all" />
+              </div>
+              <div>
+                <label htmlFor="product-unit" className="block text-xs font-medium text-slate-400 mb-1.5">{t("unit")}</label>
+                <select id="product-unit" name="unit" defaultValue="Adet" className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all cursor-pointer">
+                  <option value="Adet">Adet</option>
+                  <option value="kg">kg</option>
+                  <option value="metre">Metre</option>
+                  <option value="paket">Paket</option>
+                  <option value="litre">Litre</option>
+                </select>
+              </div>
+              <div>
+                <label htmlFor="product-threshold" className="block text-xs font-medium text-slate-400 mb-1.5">{t("criticalLevel")}</label>
+                <input id="product-threshold" name="critical_threshold" type="number" min="0" defaultValue="10" className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all" />
+              </div>
+              {firma.locationSystemEnabled && (
+                <div>
+                  <label htmlFor="product-location" className="block text-xs font-medium text-slate-400 mb-1.5">{t("shelfLocation")}</label>
+                  <input id="product-location" name="location" type="text" placeholder="..." className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all" />
+                </div>
+              )}
+            </div>
 
-          <AttributesInput />
+            <AttributesInput />
 
-          <div className="mt-8 flex justify-end">
-            <button type="submit" className="w-full sm:w-auto bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold text-sm rounded-xl px-6 py-2.5 transition-all duration-200 shadow-lg shadow-emerald-500/25 active:scale-[0.98]">
-              {t("saveProduct")}
-            </button>
-          </div>
-        </form>
-      </div>
+            <div className="mt-8 flex justify-end">
+              <button type="submit" className="w-full sm:w-auto bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold text-sm rounded-xl px-6 py-2.5 transition-all duration-200 shadow-lg shadow-emerald-500/25 active:scale-[0.98]">
+                {t("saveProduct")}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
 
       <DashboardSearch />
 
@@ -278,15 +282,17 @@ export default async function DashboardPage({
             <h2 className="text-white font-semibold text-sm">{t("productList")}</h2>
             <span className="text-xs text-slate-500">{t("productCount", { count: urunler.length })}</span>
           </div>
-          <ExportExcelButton
-            data={urunler.map((u) => ({
-              [t("productName")]: u.name,
-              [t("sku")]: u.sku || "—",
-              "Mevcut Stok": u.currentStock,
-              ...(firma.locationSystemEnabled ? { [t("shelfLocation")]: u.location || "—" } : {}),
-            }))}
-            fileName={`${firma.name}_Stok_Raporu`}
-          />
+          {canExport && (
+            <ExportExcelButton
+              data={urunler.map((u) => ({
+                [t("productName")]: u.name,
+                [t("sku")]: u.sku || "—",
+                "Mevcut Stok": u.currentStock,
+                ...(firma.locationSystemEnabled ? { [t("shelfLocation")]: u.location || "—" } : {}),
+              }))}
+              fileName={`${firma.name}_Stok_Raporu`}
+            />
+          )}
         </div>
 
         {urunler.length > 0 && (
