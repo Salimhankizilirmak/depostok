@@ -9,6 +9,7 @@ import { db } from "@/db";
 import { companies } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { sendWelcomeEmail } from "@/lib/mail";
+import UnauthorizedUI from "@/components/UnauthorizedUI";
 
 export default async function DashboardLayout({
   children,
@@ -29,7 +30,6 @@ export default async function DashboardLayout({
     });
 
     // 2) Veritabanında flag'i güncelle (Async)
-    // Bloklamaması için async olarak güncelliyoruz ancak wait etmiyoruz ki sayfa hızlı yüklensin
     db.update(companies)
       .set({ welcomeEmailSent: true })
       .where(eq(companies.id, firma.id))
@@ -41,38 +41,11 @@ export default async function DashboardLayout({
   // ── Yetkisiz erişim ──────────────────────────────────────────────────────────
   if (!firma) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center px-4">
-        <div className="max-w-md w-full bg-slate-900 border border-slate-800 rounded-2xl p-8 shadow-2xl shadow-black/50 text-center">
-          <div className="w-14 h-14 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-5">
-            <svg
-              width="26"
-              height="26"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#f87171"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <circle cx="12" cy="12" r="10" />
-              <line x1="12" y1="8" x2="12" y2="12" />
-              <line x1="12" y1="16" x2="12.01" y2="16" />
-            </svg>
-          </div>
-          <h2 className="text-white font-bold text-lg mb-2">{t("accessDenied")}</h2>
-          <p className="text-slate-400 text-sm leading-relaxed">
-            {t("noCompanyFound")}
-          </p>
-          {email && (
-            <p className="mt-4 inline-flex items-center gap-2 text-xs text-slate-500 bg-slate-800 rounded-lg px-3 py-2">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
-              </svg>
-              {email}
-            </p>
-          )}
-        </div>
-      </div>
+      <UnauthorizedUI 
+        email={email} 
+        accessDeniedText={t("accessDenied")} 
+        noCompanyFoundText={t("noCompanyFound")} 
+      />
     );
   }
 
