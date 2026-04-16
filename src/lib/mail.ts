@@ -37,7 +37,7 @@ export const sendMail = async ({
   }
 };
 
-const LOGO_URL = "https://i.ibb.co/Bq5N9s6S/novexistech.png";
+const LOGO_URL = "https://i.ibb.co/Gr8zFCd/kurumsal.jpg";
 
 /**
  * Kurumsal Aktivasyon Maili
