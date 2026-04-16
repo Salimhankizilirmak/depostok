@@ -14,6 +14,19 @@ export default function ExportExcelButton({
   const handleExport = () => {
     // Veriyi Excel formatına dönüştür
     const worksheet = XLSX.utils.json_to_sheet(data);
+    
+    // Sütun genişliklerini içeriğe göre ayarla
+    const colWidths = Object.keys(data[0] || {}).map((key) => {
+      let maxLength = key.length;
+      data.forEach((row) => {
+        const val = row[key];
+        const valLength = val ? String(val).length : 0;
+        if (valLength > maxLength) maxLength = valLength;
+      });
+      return { wch: maxLength + 2 }; // Biraz padding ekle
+    });
+    worksheet["!cols"] = colWidths;
+
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Rapor");
 

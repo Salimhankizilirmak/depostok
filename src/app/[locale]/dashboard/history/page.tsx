@@ -1,4 +1,4 @@
-import { currentUser } from "@clerk/nextjs/server";
+import { currentUser, clerkClient } from "@clerk/nextjs/server";
 import { db } from "@/db";
 import { stockMovements, products } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
@@ -34,6 +34,28 @@ export default async function HistoryPage() {
     .innerJoin(products, eq(stockMovements.productId, products.id))
     .where(eq(stockMovements.companyId, firma.id))
     .orderBy(desc(stockMovements.createdAt));
+
+  // Clerk'ten kullanıcı bilgilerini çekip eşleştirme yap
+  const uniqueEmails = Array.from(new Set(hareketler.map(h => h.userEmail).filter(Boolean))) as string[];
+  const clerk = await clerkClient();
+  const usersResponse = await clerk.users.getUserList({
+    emailAddress: uniqueEmails,
+    limit: 100
+  });
+
+  const userMap = new Map();
+  usersResponse.data.forEach(u => {
+    const fullName = [u.firstName, u.lastName].filter(Boolean).join(" ").trim();
+    const email = u.emailAddresses[0]?.emailAddress;
+    if (email) {
+      userMap.set(email, fullName || email);
+    }
+  });
+
+  const getDisplayName = (email: string | null) => {
+    if (!email) return "—";
+    return userMap.get(email) || email;
+  };
 
   const toplamGiris = hareketler
     .filter((h) => h.type === "in")
@@ -96,7 +118,7 @@ export default async function HistoryPage() {
               Tip: h.type === "in" ? "Giriş" : "Çıkış",
               Miktar: h.quantity,
               Açıklama: h.description,
-              "İşlemi Yapan": h.userEmail || "—",
+              "İşlemi Yapan": getDisplayName(h.userEmail),
             }))}
             fileName={`${firma.name}_Hareket_Gecmisi_${new Date().toLocaleDateString("tr-TR")}`}
           />
@@ -219,7 +241,7 @@ export default async function HistoryPage() {
                         {h.userEmail ? h.userEmail.substring(0, 1).toUpperCase() : "?"}
                       </div>
                       <p className="text-slate-400 text-xs">
-                        {h.userEmail ? h.userEmail.split("@")[0] : "—"}
+                        {getDisplayName(h.userEmail)}
                       </p>
                     </div>
                   </td>
