@@ -238,6 +238,16 @@ export default async function DashboardPage({
               <input id="product-price" name="price" type="number" step="0.01" min="0" defaultValue="0" className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all" />
             </div>
             <div>
+              <label htmlFor="product-unit" className="block text-xs font-medium text-slate-400 mb-1.5">{t("unit")}</label>
+              <select id="product-unit" name="unit" defaultValue="Adet" className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all cursor-pointer">
+                <option value="Adet">Adet</option>
+                <option value="kg">kg</option>
+                <option value="metre">Metre</option>
+                <option value="paket">Paket</option>
+                <option value="litre">Litre</option>
+              </select>
+            </div>
+            <div>
               <label htmlFor="product-threshold" className="block text-xs font-medium text-slate-400 mb-1.5">{t("criticalLevel")}</label>
               <input id="product-threshold" name="critical_threshold" type="number" min="0" defaultValue="10" className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all" />
             </div>

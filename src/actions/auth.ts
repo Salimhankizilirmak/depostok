@@ -33,15 +33,16 @@ export async function bindIdentitySA(username: string, password: string) {
 
       revalidatePath("/dashboard/settings");
       return { success: true };
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Clerk Update User Error:", error);
-      const rawError = error.errors?.[0]?.message || error.message || "Kimlik bilgileri güncellenemedi.";
+      const err = error as { errors?: { message: string }[]; message?: string };
+      const rawError = err.errors?.[0]?.message || err.message || "Kimlik bilgileri güncellenemedi.";
       return { 
         success: false, 
         error: translateClerkError(rawError) 
       };
     }
-  } catch (globalError: any) {
+  } catch (globalError: unknown) {
     console.error("Global Auth Action Error:", globalError);
     return { success: false, error: "Sistemsel bir hata oluştu. Lütfen tekrar deneyin." };
   }

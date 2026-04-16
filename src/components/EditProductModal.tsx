@@ -8,7 +8,16 @@ import { useRouter } from "next/navigation";
 import AttributesInput from "./AttributesInput";
 
 interface EditProductModalProps {
-  product: any;
+  product: {
+    id: string;
+    name: string;
+    sku: string | null;
+    price: number;
+    criticalThreshold: number;
+    location: string | null;
+    attributes: string | null;
+    unit: string;
+  };
   companyId: string;
   locationSystemEnabled: boolean;
 }
@@ -30,6 +39,7 @@ export default function EditProductModal({ product, companyId, locationSystemEna
       criticalThreshold: parseInt(formData.get("critical_threshold") as string) || 10,
       location: (formData.get("location") as string) || null,
       attributes: (formData.get("attributes") as string) || null,
+      unit: (formData.get("unit") as string) || "Adet",
     };
 
     startTransition(async () => {
@@ -38,8 +48,9 @@ export default function EditProductModal({ product, companyId, locationSystemEna
         toast.success(t("editSuccess"));
         setIsOpen(false);
         router.refresh();
-      } catch (error: any) {
-        toast.error(error.message || t("deleteError"));
+      } catch (error: unknown) {
+        const err = error as { message?: string };
+        toast.error(err.message || t("deleteError"));
       }
     });
   };
@@ -95,6 +106,17 @@ export default function EditProductModal({ product, companyId, locationSystemEna
                 <div>
                   <label className="block text-xs font-semibold text-slate-400 mb-1.5 uppercase tracking-wider">{t("criticalLevel")}</label>
                   <input name="critical_threshold" type="number" defaultValue={product.criticalThreshold} className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none" />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-400 mb-1.5 uppercase tracking-wider">{t("unit")}</label>
+                  <select name="unit" defaultValue={product.unit || "Adet"} className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none cursor-pointer">
+                    <option value="Adet">Adet</option>
+                    <option value="kg">kg</option>
+                    <option value="metre">Metre</option>
+                    <option value="paket">Paket</option>
+                    <option value="litre">Litre</option>
+                  </select>
                 </div>
 
                 {locationSystemEnabled && (

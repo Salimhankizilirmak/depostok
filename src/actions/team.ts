@@ -46,10 +46,10 @@ export async function addTeamMember(companyId: string, formData: FormData) {
       password: password,
       firstName: name.trim(),
     });
-  } catch (error: any) {
-    console.error("Clerk Create User Error:", error);
-    const errorMessage = error.errors?.[0]?.message || error.message || "Kullanıcı oluşturulurken bir hata oluştu.";
-    throw new Error(`Clerk Hatası: ${errorMessage}`);
+  } catch (error: unknown) {
+    console.error("Invite User Error:", error);
+    const err = error as { message?: string };
+    return { success: false, error: err.message || "Davet gönderilemedi." };
   }
 
   // 3) Yeni kullanıcıyı veri tabanına ekle

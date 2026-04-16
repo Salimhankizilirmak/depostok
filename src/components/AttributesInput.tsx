@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 
 interface Attribute {
@@ -31,19 +31,13 @@ export default function AttributesInput({ initialValue }: AttributesInputProps) 
     return [];
   });
 
-  // attributes değiştiğinde hidden input'u JSON string ile güncellemek için bir mekanizma
-  // Ancak form içinde olduğu için hidden input değerini burada tutacağız.
-  const [jsonValue, setJsonValue] = useState("");
-
-  useEffect(() => {
-    const attrObj: Record<string, string> = {};
-    attributes.forEach(attr => {
-      if (attr.name.trim()) {
-        attrObj[attr.name.trim()] = attr.value.trim();
-      }
-    });
-    setJsonValue(Object.keys(attrObj).length > 0 ? JSON.stringify(attrObj) : "");
-  }, [attributes]);
+  const attrObj: Record<string, string> = {};
+  attributes.forEach(attr => {
+    if (attr.name.trim()) {
+      attrObj[attr.name.trim()] = attr.value.trim();
+    }
+  });
+  const jsonValue = Object.keys(attrObj).length > 0 ? JSON.stringify(attrObj) : "";
 
   const addAttribute = () => {
     setAttributes([...attributes, { id: crypto.randomUUID(), name: "", value: "" }]);

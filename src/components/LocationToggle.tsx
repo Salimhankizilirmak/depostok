@@ -23,8 +23,8 @@ export default function LocationToggle({ companyId, initialValue }: LocationTogg
       try {
         await updateCompanySettings(companyId, { locationSystemEnabled: newValue });
         toast.success(t("locationSystemUpdateSuccess"));
-      } catch (error) {
-        toast.error(t("importError")); // Genel bir hata mesajı
+      } catch (_error) {
+        toast.error(t("updateError"));
         setEnabled(!newValue); // Hata durumunda geri al
       }
     });

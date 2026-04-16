@@ -25,6 +25,7 @@
     "sku": "Stok Kodu (SKU)",
     "initialStock": "Başlangıç Stoğu",
     "unitPrice": "Birim Fiyat (TL)",
+    "unit": "Birim",
     "criticalLevel": "Kritik Stok Uyarı Seviyesi",
     "saveProduct": "Ürünü Kaydet",
     "productList": "Ürün Listesi",
@@ -115,7 +116,8 @@
     "recentMovements": "Son Hareketler",
     "team": "Ekibim",
     "settings": "Ayarlar",
-    "bom": "Ürün Ağacı"
+    "bom": "Ürün Ağacı",
+    "analytics": "Analiz"
   },
   "Admin": {
     "title": "Firma Yönetimi",
@@ -145,5 +147,19 @@
     "joined": "Katılım Tarihi",
     "deleteConfirm": "Bu kullanıcıyı ekipten çıkarmak istediğinize emin misiniz?",
     "namePlaceholder": "Örn: Ahmet Yılmaz"
+  },
+  "Analytics": {
+    "title": "Analiz Paneli",
+    "description": "Depo hareketlerini ve finansal performansı grafiklerle izleyin.",
+    "searchPlaceholder": "Ürün seçin veya arayın...",
+    "mergeTitle": "Fiyat Bazında Birleştir",
+    "warehouseGeneral": "Genel Depo Analizi",
+    "unitLabel": "Birim:",
+    "quantity": "Miktar ({unit})",
+    "price": "Fiyat (TL)",
+    "monthlyIn": "Giriş",
+    "monthlyOut": "Çıkış",
+    "comparison": "Ürün Fiyat Karşılaştırması (TL)",
+    "noData": "Bu dönem için veri bulunamadı."
   }
 }

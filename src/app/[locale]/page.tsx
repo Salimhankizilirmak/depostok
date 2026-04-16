@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import InstallPWA from "@/components/InstallPWA";
 import { useTranslations } from "next-intl";
@@ -150,9 +151,11 @@ export default function Home() {
                 
                 {/* Animated Image Wrapper */}
                 <div className="w-full h-full relative transition-transform duration-1000 group-hover/browser:scale-105">
-                  <img 
+                  <Image 
                     src="/videos/preview.webp" 
                     alt="Novexis Tech Live Showcase" 
+                    width={1000}
+                    height={600}
                     className="w-full h-full object-cover object-top opacity-90 group-hover/browser:opacity-100 transition-opacity duration-700"
                   />
                 </div>

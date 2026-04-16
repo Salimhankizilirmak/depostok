@@ -25,6 +25,7 @@
     "sku": "Stock Code (SKU)",
     "initialStock": "Initial Stock",
     "unitPrice": "Unit Price (TL)",
+    "unit": "Unit",
     "criticalLevel": "Critical Stock Warning Level",
     "saveProduct": "Save Product",
     "productList": "Product List",
@@ -115,7 +116,8 @@
     "recentMovements": "Recent Movements",
     "team": "My Team",
     "settings": "Settings",
-    "bom": "Product Tree"
+    "bom": "Product Tree",
+    "analytics": "Analytics"
   },
   "Admin": {
     "title": "Company Management",
@@ -145,5 +147,19 @@
     "joined": "Joined Date",
     "deleteConfirm": "Are you sure you want to remove this user from the team?",
     "namePlaceholder": "Ex: John Doe"
+  },
+  "Analytics": {
+    "title": "Analytics Dashboard",
+    "description": "Monitor warehouse movements and financial performance with charts.",
+    "searchPlaceholder": "Search or select products...",
+    "mergeTitle": "Merge by Price",
+    "warehouseGeneral": "General Warehouse Analysis",
+    "unitLabel": "Unit:",
+    "quantity": "Quantity ({unit})",
+    "price": "Price (TL)",
+    "monthlyIn": "Inbound",
+    "monthlyOut": "Outbound",
+    "comparison": "Product Price Comparison (TL)",
+    "noData": "No data found for this period."
   }
 }

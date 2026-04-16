@@ -17,6 +17,7 @@ export default function DashboardNav({ userRole }: DashboardNavProps) {
     { href: "/dashboard", label: t("movements") },
     { href: "/dashboard/history", label: t("recentMovements") },
     { href: "/dashboard/team", label: t("team"), roles: ["Yönetici", "Super Admin"] },
+    { href: "/dashboard/analytics", label: t("analytics"), roles: ["Yönetici", "Yetkili", "Super Admin"] },
     { href: "/dashboard/bom", label: t("bom"), roles: ["Yönetici", "Super Admin", "Yetkili", "Mühendis"] },
     { href: "/dashboard/settings", label: t("settings"), roles: ["Yönetici", "Super Admin"] },
   ];

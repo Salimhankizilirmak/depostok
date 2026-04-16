@@ -63,7 +63,7 @@ export async function importBOM(companyId: string, bomRows: { parentSku: string;
     if (p.sku) skuToId.set(p.sku, p.id);
   });
 
-  const valuesToInsert: any[] = [];
+  const valuesToInsert: { companyId: string; parentProductId: string; childProductId: string; quantity: number }[] = [];
   bomRows.forEach(row => {
     const parentId = skuToId.get(row.parentSku);
     const componentId = skuToId.get(row.componentSku);

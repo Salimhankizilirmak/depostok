@@ -1,6 +1,6 @@
 "use client";
 
-import { useSignIn, useClerk, useAuth } from "@clerk/nextjs";
+import { useSignIn, useClerk } from "@clerk/nextjs";
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -55,9 +55,10 @@ export default function CustomSignInForm() {
       } else {
         setError("Giriş adımları tamamlanamadı. Lütfen yöneticinizle görüşün.");
       }
-    } catch (err: any) {
-      console.error(err);
-      setError(err.errors?.[0]?.message || "Giriş başarısız. Bilgilerinizi kontrol ediniz.");
+    } catch (err: unknown) {
+      console.error(JSON.stringify(err, null, 2));
+      const error = err as { errors?: { message: string }[] };
+      setError(error.errors?.[0]?.message || "Doğrulama başarısız.");
     } finally {
       setIsLoading(false);
     }

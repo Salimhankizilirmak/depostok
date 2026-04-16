@@ -15,6 +15,7 @@ export async function addProduct(companyId: string, formData: FormData) {
   const criticalThreshold = parseInt(formData.get("critical_threshold") as string) || 10;
   const location = formData.get("location") as string;
   const attributes = formData.get("attributes") as string;
+  const unit = formData.get("unit") as string || "Adet";
 
   if (!name) {
     throw new Error("Ürün adı zorunludur.");
@@ -29,6 +30,7 @@ export async function addProduct(companyId: string, formData: FormData) {
     criticalThreshold,
     location: location?.trim() || null,
     attributes: attributes || null,
+    unit: unit.trim(),
   });
 
   revalidatePath("/dashboard");
@@ -63,7 +65,7 @@ export async function updateStock(
   if (type === "out" && firma?.bomSystemEnabled) {
     const components = await db.select().from(productTrees).where(eq(productTrees.parentProductId, productId));
     if (components.length > 0) {
-      for (const comp of components) {
+      await Promise.all(components.map(async (comp: { childProductId: string, quantity: number }) => {
         const deduction = quantity * comp.quantity;
         
         // Bileşen stok düşüşü
@@ -82,8 +84,8 @@ export async function updateStock(
         });
 
         // Bileşen için kritik stok kontrolü (Opsiyonel ama iyi olur)
-        await checkAndNotifyCriticalStock(comp.childProductId, companyId);
-      }
+        await checkAndNotifyCriticalStock(comp.childProductId);
+      }));
       revalidatePath("/dashboard");
       return; // Ana üründen düşme
     }
@@ -101,14 +103,14 @@ export async function updateStock(
 
   // 3) Kritik stok kontrolü
   if (type === "out") {
-    await checkAndNotifyCriticalStock(productId, companyId);
+    await checkAndNotifyCriticalStock(productId);
   }
 
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/history");
 }
 
-export async function importProducts(companyId: string, productsArray: any[]) {
+export async function importProducts(companyId: string, productsArray: { name: string, sku?: string, currentStock?: number, price?: number, criticalThreshold?: number, location?: string, attributes?: any, unit?: string }[]) {
   const user = await currentUser();
   if (!user) throw new Error("Oturum açılmadı.");
 
@@ -127,6 +129,7 @@ export async function importProducts(companyId: string, productsArray: any[]) {
     criticalThreshold: p.criticalThreshold || 10,
     location: p.location || null,
     attributes: p.attributes ? JSON.stringify(p.attributes) : null,
+    unit: p.unit || "Adet",
     importBatchId: batchId,
   }));
 
@@ -179,6 +182,7 @@ export async function updateProduct(productId: string, companyId: string, data: 
   criticalThreshold?: number;
   location?: string | null;
   attributes?: string | null;
+  unit?: string;
 }) {
   const user = await currentUser();
   const email = user?.emailAddresses?.[0]?.emailAddress;
@@ -198,7 +202,7 @@ export async function updateProduct(productId: string, companyId: string, data: 
   revalidatePath("/dashboard");
 }
 
-async function checkAndNotifyCriticalStock(productId: string, companyId: string) {
+async function checkAndNotifyCriticalStock(productId: string) {
   const [updatedProduct] = await db
     .select({
       name: products.name,
@@ -227,8 +231,8 @@ async function checkAndNotifyCriticalStock(productId: string, companyId: string)
           </div>
         `,
       });
-    } catch (error) {
-      console.error("Kritik stok maili gönderilemedi:", error);
+    } catch (err: unknown) {
+      console.error(JSON.stringify(err, null, 2));
     }
   }
 }

@@ -21,8 +21,9 @@ export default function BOMToggle({ companyId, initialValue }: BOMToggleProps) {
       try {
         await updateCompanySettings(companyId, { bomSystemEnabled: newValue });
         toast.success(t("editSuccess"));
-      } catch (error) {
-        toast.error("Ayarlar güncellenirken bir hata oluştu.");
+      } catch (_error: unknown) {
+        toast.error(t("updateError"));
+      } finally {
         setEnabled(!newValue);
       }
     });

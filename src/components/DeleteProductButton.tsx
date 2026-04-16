@@ -21,8 +21,8 @@ export default function DeleteProductButton({ productId, companyId }: DeleteProd
         await deleteProduct(productId, companyId);
         toast.success(t("deleteSuccess") || "Ürün başarıyla silindi.");
         setIsOpen(false);
-      } catch (error) {
-        toast.error(t("deleteError") || "Silme işlemi sırasında bir hata oluştu.");
+      } catch (_error) {
+        toast.error(t("deleteError"));
       }
     });
   };
