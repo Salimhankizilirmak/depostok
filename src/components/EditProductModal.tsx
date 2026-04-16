@@ -90,12 +90,12 @@ export default function EditProductModal({ product, companyId, locationSystemEna
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="sm:col-span-2">
                   <label className="block text-xs font-semibold text-slate-400 mb-1.5 uppercase tracking-wider">{t("productName")}</label>
-                  <input name="name" type="text" defaultValue={product.name} required className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none" />
+                  <input name="name" type="text" defaultValue={product.name || ""} required className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none" />
                 </div>
                 
                 <div>
                   <label className="block text-xs font-semibold text-slate-400 mb-1.5 uppercase tracking-wider">{t("sku")}</label>
-                  <input name="sku" type="text" defaultValue={product.sku} className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none" />
+                  <input name="sku" type="text" defaultValue={product.sku || ""} className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none" />
                 </div>
 
                 <div>
@@ -122,12 +122,12 @@ export default function EditProductModal({ product, companyId, locationSystemEna
                 {locationSystemEnabled && (
                   <div>
                     <label className="block text-xs font-semibold text-slate-400 mb-1.5 uppercase tracking-wider">{t("shelfLocation")}</label>
-                    <input name="location" type="text" defaultValue={product.location} className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none" />
+                    <input name="location" type="text" defaultValue={product.location || ""} className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none" />
                   </div>
                 )}
               </div>
 
-              <AttributesInput initialValue={product.attributes} />
+              <AttributesInput initialValue={product.attributes || ""} />
 
               <div className="pt-4 flex items-center justify-end gap-3">
                 <button

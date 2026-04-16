@@ -66,7 +66,7 @@ export default function AnalyticsSearch({ onSelect }: AnalyticsSearchProps) {
               onClick={() => {
                 onSelect(product);
                 setQuery("");
-                setIsOpen(false);
+                setIsFocused(false);
               }}
             >
               <div>

@@ -15,7 +15,7 @@ interface TeamManagementProps {
   companyId: string;
   users: TeamUser[];
   currentUserEmail: string | null;
-  addMemberAction: (companyId: string, formData: FormData) => Promise<void>;
+  addMemberAction: (companyId: string, formData: FormData) => Promise<void | { success: boolean; error: string; } | undefined>;
   updateRoleAction: (companyId: string, userId: string, newRole: string) => Promise<void>;
   deleteMemberAction?: (companyId: string, userId: string) => Promise<void>;
   isAdminView?: boolean;
@@ -38,6 +38,8 @@ export default function TeamManagement({
        await addMemberAction(companyId, formData);
     });
   };
+
+
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">

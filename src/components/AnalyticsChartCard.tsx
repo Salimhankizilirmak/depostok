@@ -53,12 +53,12 @@ export default function AnalyticsChartCard({ productId, title, unit: initialUnit
     fetchData();
   }, [productId]);
 
-  const customTooltip = ({ active, payload, label }: { active?: boolean, payload?: Array<{ name: string, value: number, color: string }>, label?: string }) => {
+  const customTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
         <div className="bg-slate-900 border border-slate-700 p-4 rounded-xl shadow-2xl">
           <p className="text-slate-400 text-xs mb-2 font-mono">{label}</p>
-          {payload.map((entry, index: number) => (
+          {payload.map((entry: any, index: number) => (
             <div key={index} className="flex items-center gap-2 mb-1">
               <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }} />
               <p className="text-sm font-semibold text-white">
