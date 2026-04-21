@@ -38,40 +38,40 @@ export default function BOMImportExcelButton({ companyId }: BOMImportExcelButton
 
   const processBOMImport = (rawData: any[]) => {
     const bomRows: any[] = [];
-    
+
     rawData.forEach(row => {
-        const keys = Object.keys(row);
-        let parentSku = "";
-        let componentSku = "";
-        let quantity = 0;
+      const keys = Object.keys(row);
+      let parentSku = "";
+      let componentSku = "";
+      let quantity = 0;
 
-        keys.forEach(k => {
-            const clean = normalize(k);
-            if (clean.includes("ana") || clean.includes("parent")) parentSku = row[k];
-            if (clean.includes("bilesen") || clean.includes("component")) componentSku = row[k];
-            if (clean.includes("miktar") || clean.includes("qty") || clean.includes("quantity")) quantity = parseFloat(row[k]);
-        });
+      keys.forEach(k => {
+        const clean = normalize(k);
+        if (clean.includes("ana") || clean.includes("parent")) parentSku = row[k];
+        if (clean.includes("bilesen") || clean.includes("component")) componentSku = row[k];
+        if (clean.includes("miktar") || clean.includes("qty") || clean.includes("quantity")) quantity = parseFloat(row[k]);
+      });
 
-        if (parentSku && componentSku && quantity > 0) {
-            bomRows.push({ parentSku, componentSku, quantity });
-        }
+      if (parentSku && componentSku && quantity > 0) {
+        bomRows.push({ parentSku, componentSku, quantity });
+      }
     });
 
     if (bomRows.length === 0) {
-        toast.error(t("importNoData"));
-        return;
+      toast.error(t("importNoData"));
+      return;
     }
 
     startTransition(async () => {
-        try {
-            const result = await importBOM(companyId, bomRows);
-            if (result.success) {
-                toast.success(t("bomImportSuccess"));
-                router.refresh();
-            }
-        } catch (err) {
-            toast.error(t("importError"));
+      try {
+        const result = await importBOM(companyId, bomRows);
+        if (result.success) {
+          toast.success(t("bomImportSuccess"));
+          router.refresh();
         }
+      } catch (err) {
+        toast.error(t("importError"));
+      }
     });
   };
 
@@ -89,10 +89,10 @@ export default function BOMImportExcelButton({ companyId }: BOMImportExcelButton
         type="file"
         ref={fileInputRef}
         onChange={handleFileUpload}
-        accept=".xlsx, .xls, .csv"
+        accept=".xlsx, .xls, .csv, .xlsb"
         className="hidden"
       />
-      
+
       <button
         onClick={() => fileInputRef.current?.click()}
         disabled={isPending}

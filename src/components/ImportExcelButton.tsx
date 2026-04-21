@@ -141,10 +141,10 @@ export default function ImportExcelButton({ companyId }: ImportExcelButtonProps)
         type="file"
         ref={fileInputRef}
         onChange={handleFileUpload}
-        accept=".xlsx, .xls, .csv"
+        accept=".xlsx, .xls, .csv, .xlsb"
         className="hidden"
       />
-      
+
       <button
         onClick={() => fileInputRef.current?.click()}
         disabled={isPending}
