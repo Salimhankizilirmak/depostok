@@ -184,11 +184,15 @@ export async function importProducts(
     importBatchId: batchId,
   }));
 
-  // Chunking
-  await db
-    .insert(products)
-    .values(values)
-    .onConflictDoNothing({ target: [products.companyId, products.sku] });
+  // Chunking implementation
+  const BATCH_SIZE = 500;
+  for (let i = 0; i < values.length; i += BATCH_SIZE) {
+    const chunk = values.slice(i, i + BATCH_SIZE);
+    await db
+      .insert(products)
+      .values(chunk)
+      .onConflictDoNothing({ target: [products.companyId, products.sku] });
+  }
 
   revalidatePath("/dashboard");
   return { success: true, count: values.length, batchId };
