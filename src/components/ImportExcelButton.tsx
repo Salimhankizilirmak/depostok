@@ -44,14 +44,14 @@ export default function ImportExcelButton({ companyId }: ImportExcelButtonProps)
 
     const reader = new FileReader();
     reader.onload = (evt) => {
-      const bstr = evt.target?.result;
-      const wb = XLSX.read(bstr, { type: "binary" });
+      const data = evt.target?.result;
+      const wb = XLSX.read(data, { type: "array" });
       const wsname = wb.SheetNames[0];
       const ws = wb.Sheets[wsname];
-      const data = XLSX.utils.sheet_to_json(ws);
-      processImport(data);
+      const jsonData = XLSX.utils.sheet_to_json(ws, { blankrows: false });
+      processImport(jsonData);
     };
-    reader.readAsBinaryString(file);
+    reader.readAsArrayBuffer(file);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -141,13 +141,14 @@ export default function ImportExcelButton({ companyId }: ImportExcelButtonProps)
         type="file"
         ref={fileInputRef}
         onChange={handleFileUpload}
-        accept=".xlsx, .xls, .csv, .xlsb"
+        accept=".xlsx, .xls, .csv, .xlsb, application/vnd.ms-excel.sheet.binary.macroEnabled.12"
         className="hidden"
       />
 
       <button
         onClick={() => fileInputRef.current?.click()}
         disabled={isPending}
+        title={t("supportedFormats")}
         className="w-full sm:w-auto flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 text-white font-semibold text-sm rounded-xl px-5 py-2.5 transition-all border border-slate-700 shadow-lg active:scale-[0.98] disabled:opacity-50"
       >
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">

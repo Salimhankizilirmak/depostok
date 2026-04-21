@@ -55,6 +55,7 @@
     "importing": "Aktarılıyor...",
     "importNoData": "Aktarılacak geçerli veri bulunamadı.",
     "importError": "İçe aktarma sırasında bir hata oluştu.",
+    "supportedFormats": "Desteklenen formatlar: .xlsx, .xls, .csv ve .xlsb",
     "addProductDesc": "Hızlıca yeni bir ürün ekleyebilir veya Excel listesi yükleyebilirsiniz.",
     "additionalAttributes": "Ek Özellikler",
     "attributeName": "Özellik Adı",
